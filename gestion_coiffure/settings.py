@@ -11,26 +11,23 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
-import os
+from decouple import Csv, config
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = [
-    "barber-pro-upue.onrender.com",  # Remplace par ton URL Render
-    "barberpro.onrender.com",        # Si tu as plusieurs apps
-    "127.0.0.1",
-    "localhost",
-]
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="127.0.0.1,localhost,192.168.0.138,barberpro-pc2e.onrender.com",
+    cast=Csv()
+)
 
 
 # Application definition
@@ -57,12 +54,6 @@ INSTALLED_APPS = [
 
 ]
 
-'''
-<!--<a href="{% url 'logout' %}" class="text-danger">
-            <i class="bi bi-box-arrow-right"></i> Déconnexion
-        </a>-->
-        '''
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,12 +66,6 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'accounts.User'
 
 ROOT_URLCONF = 'gestion_coiffure.urls'
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -108,8 +93,9 @@ TEMPLATES = [
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,"static")
+    BASE_DIR / "static"
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 
@@ -122,11 +108,11 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'coiffure_db',
-        'USER': 'adama',
-        'PASSWORD': 'doucoure2005',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 
@@ -195,8 +181,8 @@ LOGIN_REDIRECT_URL = 'accounts:redirect_user'
 LOGOUT_REDIRECT_URL = 'login_page'
 
 # Mode demo (test application)
-DEMO_LOGIN_ENABLED = os.getenv("DEMO_LOGIN_ENABLED", str(DEBUG)).lower() in ("1", "true", "yes", "on")
-DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo_salon")
-DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo123456")
-DEMO_EMAIL = os.getenv("DEMO_EMAIL", "demo@salon.local")
-DEMO_SALON_NAME = os.getenv("DEMO_SALON_NAME", "Salon Demo")
+DEMO_LOGIN_ENABLED = str(config('DEMO_LOGIN_ENABLED', default=str(DEBUG))).lower() in ('1', 'true', 'yes', 'on')
+DEMO_USERNAME = config('DEMO_USERNAME', default='demo_salon')
+DEMO_PASSWORD = config('DEMO_PASSWORD', default='demo123456')
+DEMO_EMAIL = config('DEMO_EMAIL', default='demo@salon.local')
+DEMO_SALON_NAME = config('DEMO_SALON_NAME', default='Salon Demo')
