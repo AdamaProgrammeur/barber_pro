@@ -1,25 +1,62 @@
 {% extends "layout/base_login_auth.html" %}
 
+{% block title %}Connexion - Salon de Coiffure Pro{% endblock %}
+
 {% block content %}
-<div class="login-box">
-    <div class="card card-outline card-primary">
-        <div class="card-header text-center"><b>Salon Login</b></div>
-        <div class="card-body">
-            <form id="loginForm">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="username" placeholder="Nom utilisateur" required>
-                </div>
-                <div class="mb-3">
-                    <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
-            </form>
+<div>
+    <h2 class="auth-title">Connexion à votre salon</h2>
+    <p class="auth-subtitle">Connectez-vous pour gérer vos clients, services et paiements.</p>
+
+    <form id="loginForm" class="d-grid gap-2">
+        {% csrf_token %}
+        <div>
+            <label class="form-label mb-1">Nom d'utilisateur</label>
+            <input type="text" class="form-control" id="username" placeholder="ex: adama_admin" required>
         </div>
+
+        <div>
+            <label class="form-label mb-1">Mot de passe</label>
+            <input type="password" class="form-control" id="password" placeholder="Votre mot de passe" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2 w-100">Se connecter</button>
+        {% if demo_login_enabled %}
+        <button type="button" id="demoLoginBtn" class="btn btn-outline-warning w-100">Connexion demo (test)</button>
+        {% endif %}
+    </form>
+
+    <div class="mt-3 d-flex flex-column flex-sm-row gap-2">
+        <a href="/accounts/register-salon/" class="btn btn-soft w-100">Créer votre salon</a>
+        <a href="/" class="btn btn-soft w-100">Retour accueil</a>
     </div>
 </div>
 
 <script>
+async function completeLogin(data) {
+    localStorage.setItem("access_token", data.access);
+    localStorage.setItem("refresh_token", data.refresh);
+
+    const profileRes = await fetch("{% url 'accounts:api:profile' %}", {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + data.access
+        }
+    });
+
+    if (!profileRes.ok) throw new Error("Impossible de charger le profil");
+
+    const profile = await profileRes.json();
+    const role = (profile.role || "").toLowerCase();
+
+    if (role === "admin") {
+        window.location.href = "/dashboard/";
+    } else if (role === "receptionniste" || role === "coiffeur") {
+        window.location.href = "/gestion_file/";
+    } else {
+        throw new Error("Role inconnu, contactez l'administrateur !");
+    }
+}
+
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -29,45 +66,41 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     };
 
     try {
-        // 1️⃣ Connexion via JWT
-        const res = await fetch("{% url 'accounts:api_token_obtain_pair' %}", {
+        const res = await fetch("{% url 'accounts:api:token_obtain_pair' %}", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
         if (!res.ok) throw new Error("Identifiants incorrects !");
-
         const data = await res.json();
-        localStorage.setItem("access_token", data.access);
-        localStorage.setItem("refresh_token", data.refresh);
-
-        // 2️⃣ Récupérer le profil de l'utilisateur via DRF
-        const profileRes = await fetch("{% url 'accounts:profile_api' %}", {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + data.access
-            }
-        });
-
-        if (!profileRes.ok) throw new Error("Impossible de charger le profil");
-
-        const profile = await profileRes.json();
-
-        // 3️⃣ Redirection selon rôle
-        if (profile.role === "ADMIN") {
-            window.location.href = "/dashboard/";
-        } else if (profile.role === "COIFFEUR") {
-            window.location.href = "/gestion_file/";
-        } else if (profile.role === "RECEPTIONNISTE") {
-            window.location.href = "/crud_client/";
-        } else {
-            alert("Rôle inconnu, contactez l'administrateur !");
-        }
-
+        await completeLogin(data);
     } catch (err) {
         alert(err.message);
     }
 });
+
+const demoBtn = document.getElementById("demoLoginBtn");
+if (demoBtn) {
+    demoBtn.addEventListener("click", async () => {
+        try {
+            const res = await fetch("{% url 'accounts:api:demo_login' %}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || "Connexion demo impossible");
+            await completeLogin(data);
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("demo") === "1") {
+        demoBtn.click();
+    }
+}
 </script>
 {% endblock content %}

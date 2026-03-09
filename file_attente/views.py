@@ -1,117 +1,96 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.conf import settings
 from django.utils import timezone
 from .models import FileAttente
+from salon.models import UserSalon
 from .serializers import FileAttenteSerializer
 from paiements.models import Paiement
-from accounts.permissions import IsReceptionniste
-
+from paiements.serializers import PaiementSerializer
 
 # -------------------------------
-# Permissions combinées
+# Permissions dynamiques
 # -------------------------------
-class CoiffeurOrAdmin(permissions.BasePermission):
-    """
-    Autorise uniquement les Coiffeurs ou Admin à commencer/terminer.
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role in ["COIFFEUR", "ADMIN"]
+class ReceptionnisteOrAdminForWork(permissions.BasePermission):
+    """Autorise réceptionnistes ou admins du salon lié à la file"""
+    def has_object_permission(self, request, view, obj):
+        salon = getattr(obj.service, 'salon', None)
+        if not salon:
+            return False
+        return UserSalon.objects.filter(
+            user=request.user,
+            salon=salon,
+            role__in=['receptionniste', 'admin']
+        ).exists()
 
 
 class ReceptionnisteOrAdmin(permissions.BasePermission):
-    """
-    Autorise uniquement les Réceptionnistes ou Admin à créer.
-    """
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role in ["RECEPTIONNISTE", "ADMIN"]
+    """Autorise réceptionnistes ou admins du salon lié à la file"""
+    def has_object_permission(self, request, view, obj):
+        salon = getattr(obj.service, 'salon', None)
+        if not salon:
+            return False
+        return UserSalon.objects.filter(
+            user=request.user,
+            salon=salon,
+            role__in=['receptionniste', 'admin']
+        ).exists()
 
 
 # -------------------------------
-# ViewSet FileAttente
+# FileAttente ViewSet
 # -------------------------------
 class FileAttenteViewSet(viewsets.ModelViewSet):
-    queryset = FileAttente.objects.all().order_by('rang')
     serializer_class = FileAttenteSerializer
 
-    # Permissions dynamiques selon l'action
     def get_permissions(self):
         if self.action in ['commencer', 'terminer']:
-            permission_classes = [CoiffeurOrAdmin]
+            permission_classes = [permissions.IsAuthenticated, ReceptionnisteOrAdminForWork]
         elif self.action == 'create':
-            permission_classes = [ReceptionnisteOrAdmin]
+            permission_classes = [permissions.IsAuthenticated, ReceptionnisteOrAdmin]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [p() for p in permission_classes]
 
-    # --------------------------
-    @action(detail=True, methods=['post'])
+    def get_queryset(self):
+        """Filtrer uniquement les files du salon de l'utilisateur connecté"""
+        user_salon = UserSalon.objects.filter(user=self.request.user).first()
+        if not user_salon:
+            return FileAttente.objects.none()
+        return FileAttente.objects.filter(service__salon=user_salon.salon).order_by('rang')
+
+    def perform_create(self, serializer):
+        """Vérifie que le service appartient au salon de l'utilisateur"""
+        user_salon = UserSalon.objects.filter(user=self.request.user).first()
+        if not user_salon:
+            raise permissions.PermissionDenied("Impossible de créer une file sans salon")
+
+        salon_utilisateur = user_salon.salon
+        service = serializer.validated_data.get('service')
+        if service.salon != salon_utilisateur:
+            raise permissions.PermissionDenied("Le service doit appartenir au salon de l'utilisateur")
+
+        serializer.save()
+
+    # -------------------------------
+    # Actions personnalisées
+    # -------------------------------
+    @action(detail=True, methods=['post'], url_path='commencer')
     def commencer(self, request, pk=None):
+        """Marquer la file comme en cours"""
         file = self.get_object()
-
-        # Vérifier le statut
-        if file.statut != 'EN_ATTENTE':
-            return Response({"error": "Ce client ne peut pas commencer."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Vérifier priorité du client
-        plus_ancien = FileAttente.objects.filter(statut="EN_ATTENTE").order_by("heure_arrivee").first()
-        if file.id != plus_ancien.id:
-            return Response({"error": "Ce n'est pas le client prioritaire."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Vérifier places disponibles
-        en_cours = FileAttente.objects.filter(statut='EN_COURS').count()
-        if en_cours >= settings.MAX_POSTE:
-            return Response({"error": "Toutes les places sont occupées."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Commencer le service
-        file.statut = 'EN_COURS'
-        file.date_debut = timezone.now()
+        file.statut = "EN_COURS"
+        file.heure_debut = timezone.now()
         file.save()
-
         serializer = self.get_serializer(file)
-        places_disponibles = settings.MAX_POSTE - (en_cours + 1)  # après avoir commencé ce client
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({
-            "file_attente": serializer.data,
-            "places_disponibles": places_disponibles
-        }, status=status.HTTP_200_OK)
-
-    # --------------------------
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], url_path='terminer')
     def terminer(self, request, pk=None):
-        client = self.get_object()
-
-        # Vérifier le statut
-        if client.statut != 'EN_COURS':
-            return Response({"error": "Le client n'est pas en cours."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Vérifier paiement
-        try:
-            paiement = client.paiement
-        except Paiement.DoesNotExist:
-            return Response({"error": "Le paiement n'a pas été effectué."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if paiement.statut != "VALIDE":
-            return Response({"error": "Le paiement est incomplet ou invalide."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Terminer le service
-        client.statut = 'TERMINE'
-        client.heure_fin = timezone.now()
-        client.save()
-
-        # Calculer places disponibles
-        en_cours_count = FileAttente.objects.filter(statut='EN_COURS').count()
-        places_disponibles = settings.MAX_POSTE - en_cours_count
-
-        # Recalculer les rangs
-        attente_clients = FileAttente.objects.filter(statut='EN_ATTENTE').order_by('heure_arrivee')
-        for index, c in enumerate(attente_clients, start=1):
-            c.rang = index
-            c.save()
-
-        serializer = self.get_serializer(client)
-        return Response({
-            "file_attente": serializer.data,
-            "places_disponibles": places_disponibles
-        }, status=status.HTTP_200_OK)
+        """Marquer la file comme terminée"""
+        file = self.get_object()
+        file.statut = "TERMINE"
+        file.heure_fin = timezone.now()
+        file.save()
+        serializer = self.get_serializer(file)
+        return Response(serializer.data, status=status.HTTP_200_OK)

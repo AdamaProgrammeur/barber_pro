@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'services',
     'paiements',
     'file_attente',
-    'dashbord'
+    'dashbord',
+    'salon',
 
 ]
 
@@ -113,8 +114,12 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'coiffure_db',
+        'USER': 'adama',
+        'PASSWORD': 'doucoure2005',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -179,6 +184,12 @@ MAX_POSTE = 3  # nombre maximum de clients EN_COURS simultanément
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-
 LOGIN_REDIRECT_URL = 'accounts:redirect_user'
 LOGOUT_REDIRECT_URL = 'login_page'
+
+# Mode demo (test application)
+DEMO_LOGIN_ENABLED = os.getenv("DEMO_LOGIN_ENABLED", str(DEBUG)).lower() in ("1", "true", "yes", "on")
+DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo_salon")
+DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo123456")
+DEMO_EMAIL = os.getenv("DEMO_EMAIL", "demo@salon.local")
+DEMO_SALON_NAME = os.getenv("DEMO_SALON_NAME", "Salon Demo")

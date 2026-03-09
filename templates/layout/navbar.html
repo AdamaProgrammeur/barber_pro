@@ -1,91 +1,115 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container-fluid">
+<nav id="mainNavbar" class="navbar navbar-expand-lg shadow-sm">
+  <div class="container-fluid">
 
-        <a class="navbar-brand fw-bold" href="{% url 'dashboard_view' %}">
-            💈 Salon
-        </a>
+    <!-- Logo + Nom salon -->
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'dashboard_view' %}">
+      <img id="salonLogo"
+           src="/static/images/default_logo.png"
+           class="rounded-circle me-2"
+           style="width:40px;height:40px;object-fit:cover;">
+      <span id="salonName">Salon de Coiffure</span>
+    </a>
 
-        <!-- Partie droite -->
-        <div class="ms-auto d-flex align-items-center">
+    <div class="ms-auto d-flex align-items-center flex-wrap justify-content-end gap-2" id="topActionBar">
 
-            <!-- Menu ADMIN -->
-            <div id="adminMenu" class="me-2" style="display:none;">
-                <a href="/dashboard/" class="btn btn-sm btn-primary">Dashboard Admin</a>
-            </div>
+      <!-- Bouton Mode -->
+      <button id="toggleThemeBtn" class="btn btn-sm btn-outline-secondary">
+        🌙
+      </button>
 
-            <!-- Menu COIFFEUR -->
-            <div id="coiffeurMenu" class="me-2" style="display:none;">
-                <a href="/gestion_file/" class="btn btn-sm btn-warning">File Coiffeur</a>
-            </div>
+      <!-- Menus par rôle -->
+      <div id="adminMenu" style="display:none;">
+        <a href="/dashboard/" class="btn btn-sm btn-primary">Dashboard</a>
+      </div>
 
-            <!-- Menu RECEPTIONNISTE -->
-            <div id="receptionMenu" class="me-2" style="display:none;">
-                <a href="/clients_file/" class="btn btn-sm btn-success">Clients & File</a>
-            </div>
+      <div id="coiffeurMenu" style="display:none;">
+        <a href="/gestion_file/" class="btn btn-sm btn-warning">File</a>
+      </div>
 
-            <!-- Menu utilisateur avec dropdown -->
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle"></i> <span id="username">Utilisateur</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                    <li>
-                        <a class="dropdown-item" href="{% url 'profile_page' %}">
-                            <i class="bi bi-person"></i> Mon profil
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form method="post" action="{% url 'logout_page' %}" class="px-3 py-1">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                <i class="bi bi-box-arrow-right"></i> Déconnexion
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
+      <div id="receptionMenu" style="display:none;">
+        <a href="/clients_file/" class="btn btn-sm btn-success">Clients</a>
+      </div>
 
-        </div>
+
     </div>
+  </div>
 </nav>
+
+<style>
+  #mainNavbar .navbar-brand span {
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 575.98px) {
+    #mainNavbar .container-fluid {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    #mainNavbar .navbar-brand {
+      margin-right: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    #mainNavbar .navbar-brand img {
+      width: 34px !important;
+      height: 34px !important;
+    }
+
+    #topActionBar {
+      gap: 0.35rem !important;
+    }
+
+    #topActionBar .btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+</style>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("access_token");
-
-    if (!token) {
-        // Si pas connecté, rediriger vers login
-        window.location.href = "/accounts/login/";
-        return;
-    }
+    if (!token) return;
 
     try {
-        // 🔹 Récupération du profil via API
-        const res = await fetch("{% url 'accounts:profile_api' %}", {
+        const response = await fetch("/api/dashboard/", {
+            method: "GET",
             headers: {
-                "Authorization": "Bearer " + token,
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             }
         });
 
-        if (!res.ok) throw new Error("Impossible de récupérer le profil");
+        if (!response.ok) throw new Error("Impossible de récupérer l'utilisateur connecté.");
 
-        const user = await res.json();
+        const data = await response.json();
+        const user = data.user_connecte;
 
-        // 🔹 Affichage du username
-        document.getElementById("username").innerText = user.username;
+        if (!user || !user.username) return;
 
-        // 🔹 Gestion des rôles
-        if (user.role === "ADMIN") document.getElementById("adminMenu").style.display = "block";
-        if (user.role === "COIFFEUR") document.getElementById("coiffeurMenu").style.display = "block";
-        if (user.role === "RECEPTIONNISTE") document.getElementById("receptionMenu").style.display = "block";
+        // Mettre à jour le username
+        const usernameEl = document.getElementById("username");
+        if (usernameEl) usernameEl.textContent = user.username;
 
-    } catch (err) {
-        console.error(err);
-        // Token invalide → redirection vers login
-        localStorage.removeItem("access_token");
-        window.location.href = "/accounts/login/";
+        // Montre les menus selon le rôle
+        const role = user.role?.toUpperCase() || "";
+        const roleMenus = {
+            "ADMIN": "adminMenu",
+            "COIFFEUR": "coiffeurMenu",
+            "RECEPTIONNISTE": "receptionMenu"
+        };
+
+        Object.entries(roleMenus).forEach(([r, id]) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = (role === r) ? "block" : "none";
+        });
+
+    } catch (error) {
+        console.error("Erreur récupération utilisateur :", error);
     }
 });
 </script>

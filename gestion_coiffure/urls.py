@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/', include('paiements.urls')),
     path('api/', include('file_attente.urls')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('', include('salon.urls')),   # 🔹 inclure les URLs du salon
     
     path('api/', include('dashbord.urls')),
     path('accounts/', include('user_profile.urls')),

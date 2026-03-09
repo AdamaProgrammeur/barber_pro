@@ -1,7 +1,7 @@
 {% extends "layout/base.html" %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
     <h3>Gestion des Utilisateurs</h3>
     <button class="btn btn-primary" id="addUserBtn">
         <i class="fa fa-plus"></i> Nouveau
@@ -16,21 +16,22 @@
            placeholder="Rechercher par username, email, prénom ou nom...">
 </div>
 
-<table class="table table-hover table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Prénom</th>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Rôle</th>
-            
-            <th width="180">Actions</th>
-        </tr>
-    </thead>
-    <tbody id="users-table"></tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-hover table-bordered mb-0">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th width="180">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="users-table"></tbody>
+    </table>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="userModal" tabindex="-1">
@@ -45,7 +46,7 @@
                     <input type="hidden" id="user-id">
 
                     <label class="form-label">Username</label>
-                    <input type="text" id="username" class="form-control mb-3" required>
+                    <input type="text" id="username" name="username" class="form-control mb-3" required>
 
                     <label class="form-label">Prénom</label>
                     <input type="text" id="first_name" class="form-control mb-3" required>
@@ -59,11 +60,11 @@
                     <label class="form-label">Mot de passe</label>
                     <input type="password" id="password" class="form-control mb-3"
                            placeholder="Laisser vide si inchangé">
+
                     <label class="form-label">Rôle</label>
                     <select id="role" class="form-select mb-3" required>
-                        <option value="ADMIN">Admin</option>
-                        <option value="COIFFEUR">Coiffeur</option>
-                        <option value="RECEPTIONNISTE">Réceptionniste</option>
+                        <option value="admin">Admin</option>
+                        <option value="receptionniste">Réceptionniste</option>
                     </select>
 
                     <button type="submit" class="btn btn-success w-100">
@@ -75,7 +76,6 @@
     </div>
 </div>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("access_token");
@@ -83,12 +83,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("searchInput");
     const modalElement = document.getElementById("userModal");
     const modal = new bootstrap.Modal(modalElement);
-
     let allUsers = [];
 
-    // =========================
-    // Fonction pour afficher une alerte
-    // =========================
     function showAlert(msg, type="success") {
         document.getElementById("alert-container").innerHTML =
             `<div class="alert alert-${type} alert-dismissible fade show">
@@ -97,12 +93,9 @@ document.addEventListener("DOMContentLoaded", function () {
              </div>`;
     }
 
-    // =========================
-    // Récupération des utilisateurs depuis l'API
-    // =========================
     async function fetchUsers() {
         try {
-            const res = await fetch("/accounts/api/users/", {
+            const res = await fetch("/api/usersalon/", {
                 headers: { "Authorization": "Bearer " + token }
             });
             if (!res.ok) throw new Error("Erreur chargement utilisateurs");
@@ -119,9 +112,6 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTable(users);
     }
 
-    // =========================
-    // Affichage de la table
-    // =========================
     function renderTable(users) {
         table.innerHTML = "";
         users.forEach(u => {
@@ -147,9 +137,6 @@ document.addEventListener("DOMContentLoaded", function () {
         attachEvents();
     }
 
-    // =========================
-    // Gestion des boutons Edit/Delete
-    // =========================
     function attachEvents() {
         document.querySelectorAll(".edit-btn").forEach(btn => {
             btn.onclick = () => editUser(btn.dataset.id);
@@ -169,30 +156,36 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("first_name").value = user.first_name;
         document.getElementById("last_name").value = user.last_name;
         document.getElementById("email").value = user.email;
-        document.getElementById("role").value = user.role;
-        document.getElementById("photo").value = user.photo;
-        document.getElementById("password").value = ""; // Mot de passe vide
+        document.getElementById("role").value = user.role.toLowerCase();
+        document.getElementById("password").value = "";
         modal.show();
     }
 
     async function deleteUser(id) {
-        if (!confirm("Confirmer suppression ?")) return;
-        try {
-            const res = await fetch(`/accounts/api/users/${id}/`, {
-                method: "DELETE",
-                headers: { "Authorization": "Bearer " + token }
-            });
-            if (!res.ok) throw new Error("Erreur suppression");
-            showAlert("Utilisateur supprimé");
-            await loadUsers();
-        } catch (err) {
-            showAlert(err.message, "danger");
-        }
+        const container = document.getElementById("alert-container");
+        container.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Confirmer suppression ?
+                <button id="confirm-delete" class="btn btn-sm btn-danger ms-2">Oui</button>
+                <button id="cancel-delete" class="btn btn-sm btn-secondary ms-1">Non</button>
+            </div>`;
+        document.getElementById("confirm-delete").onclick = async () => {
+            container.innerHTML = '';
+            try {
+                const res = await fetch(`/api/usersalon/${id}/`, {
+                    method: "DELETE",
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                if (!res.ok) throw new Error("Erreur suppression");
+                showAlert("Utilisateur supprimé");
+                await loadUsers();
+            } catch (err) {
+                showAlert(err.message, "danger");
+            }
+        };
+        document.getElementById("cancel-delete").onclick = () => container.innerHTML = '';
     }
 
-    // =========================
-    // Ouvrir le modal pour création
-    // =========================
     document.getElementById("addUserBtn").onclick = () => {
         document.getElementById("modalTitle").innerText = "Nouvel utilisateur";
         document.getElementById("user-form").reset();
@@ -200,33 +193,29 @@ document.addEventListener("DOMContentLoaded", function () {
         modal.show();
     };
 
-    // =========================
-    // Submit form (create/update)
-    // =========================
     document.getElementById("user-form").addEventListener("submit", async function(e) {
         e.preventDefault();
         const id = document.getElementById("user-id").value;
+        const usernameVal = document.getElementById("username").value.trim();
+        const emailVal = document.getElementById("email").value.trim();
+        const passwordVal = document.getElementById("password").value;
+        const roleVal = document.getElementById("role").value.toLowerCase();
 
         const payload = {
-            username: document.getElementById("username").value,
+            username: usernameVal,
             first_name: document.getElementById("first_name").value,
             last_name: document.getElementById("last_name").value,
-            email: document.getElementById("email").value,
-            
-            role: document.getElementById("role").value
+            email: emailVal,
+            role: roleVal
         };
 
-        const passwordVal = document.getElementById("password").value;
-
-        // Mot de passe obligatoire seulement pour création
-        if (!id && !passwordVal) {
-            return showAlert("Le mot de passe est obligatoire pour créer un utilisateur", "danger");
-        }
-
+        if (!usernameVal) return showAlert("Le nom d'utilisateur est requis.", "danger");
+        if (!emailVal) return showAlert("L'email est requis.", "danger");
+        if (!id && !passwordVal) return showAlert("Le mot de passe est obligatoire pour créer un utilisateur", "danger");
         if (passwordVal) payload.password = passwordVal;
 
-        const url = id ? `/accounts/api/users/${id}/` : "/accounts/api/users/";
-        const method = "POST" ;
+        const url = id ? `/api/usersalon/${id}/` : "/api/usersalon/";
+        const method = id ? "PUT" : "POST";
 
         try {
             const res = await fetch(url, {
@@ -237,8 +226,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify(payload)
             });
-            const data = await res.json();
 
+            const data = await res.json();
             if (res.ok) {
                 showAlert("Utilisateur enregistré");
                 bootstrap.Modal.getInstance(document.getElementById("userModal")).hide();
@@ -251,9 +240,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // =========================
-    // Recherche dynamique
-    // =========================
     searchInput.addEventListener("keyup", function () {
         const keyword = this.value.toLowerCase();
         const filtered = allUsers.filter(u =>
@@ -265,10 +251,8 @@ document.addEventListener("DOMContentLoaded", function () {
         renderTable(filtered);
     });
 
-    // =========================
-    // Chargement initial
-    // =========================
     loadUsers();
 });
 </script>
+
 {% endblock %}

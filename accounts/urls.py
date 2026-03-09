@@ -1,20 +1,39 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, login_view, logout_view, MyTokenObtainPairView, ProfileAPIView
+from .views import (
+    UserViewSet,
+    login_view,
+    logout_view,
+    MyTokenObtainPairView,
+    ProfileAPIView,
+    RegisterSalonAPIView,
+    demo_login_view,
+)
 from rest_framework_simplejwt.views import TokenRefreshView
 
 app_name = 'accounts'
 
+# Router DRF pour /api/users/
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='users')  # crée automatiquement list, create, retrieve, update, delete
+router.register('users', UserViewSet, basename='users')
 
-urlpatterns = [
-    # 🔹 JWT endpoints
-    path("api/token/", MyTokenObtainPairView.as_view(), name="api_token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/profile/", ProfileAPIView.as_view(), name="profile_api"),
+# Pages classiques
+web_urlpatterns = [
+    path('login/', login_view, name='login_page'),
+    path('logout/', logout_view, name='logout_page'),
+]
 
+# Endpoints REST
+api_urlpatterns = [
+    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('demo-login/', demo_login_view, name='demo_login'),
+    path('profile/', ProfileAPIView.as_view(), name='profile'),
+    path('register-salon/', RegisterSalonAPIView.as_view(), name='register_salon'),
+    path('', include(router.urls)),  # → /users/, /users/{pk}/
+]
 
-    # 🔹 API utilisateurs
-    path('api/', include(router.urls)),  # 👈 ici on inclut tous les endpoints du ViewSet
+# URLs finales
+urlpatterns = web_urlpatterns + [
+    path('api/', include((api_urlpatterns, app_name), namespace='api')),
 ]

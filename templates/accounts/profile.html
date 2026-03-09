@@ -1,18 +1,26 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-<h2>Profile</h2>
-<form id="profileForm">
-  <div class="mb-3">
-      <label>Email</label>
-      <input type="email" class="form-control" id="profileEmail" value="">
-  </div>
-  <div class="mb-3">
-      <label>Nom complet</label>
-      <input type="text" class="form-control" id="profileNom" value="">
-  </div>
-  <button type="submit" class="btn btn-primary">Enregistrer</button>
-</form>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card p-3 p-md-4">
+                <h2 class="h4 mb-3">Profile</h2>
+                <form id="profileForm">
+                  <div class="mb-3">
+                      <label>Email</label>
+                      <input type="email" class="form-control" id="profileEmail" value="">
+                  </div>
+                  <div class="mb-3">
+                      <label>Nom complet</label>
+                      <input type="text" class="form-control" id="profileNom" value="">
+                  </div>
+                  <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 async function loadProfile() {
@@ -26,7 +34,7 @@ async function loadProfile() {
         }
 
         // Récupération du profil via API
-        const res = await fetch("{% url 'accounts:profile_api' %}", {
+        const res = await fetch("{% url 'accounts:api:profile' %}", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +54,7 @@ async function loadProfile() {
         const data = await res.json();
 
         document.getElementById("profileEmail").value = data.email || "";
-        document.getElementById("profileNom").value = data.nom_complet || "";
+        document.getElementById("profileNom").value = data.username || "";
 
     } catch (err) {
         alert(err.message);
@@ -66,7 +74,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
 
     try {
         const res = await fetch("/accounts/api/profile/", {
-            method: "GET",
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + token

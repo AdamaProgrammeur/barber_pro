@@ -1,223 +1,227 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-<h1 class="mb-5 text-center text-dark fw-bold" style="font-size:2.5rem;">Paramètres du Salon & Sécurité</h1>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Paramètres du Salon</h2>
+  </div>
 
-<div class="container">
+  <div class="row g-4">
+    <div class="col-lg-12">
+      <div class="card shadow-sm p-4 rounded-4">
+        <h5 class="fw-semibold text-primary mb-3">Informations du Salon</h5>
+        <p>Complétez les informations de votre salon et ajoutez un logo.</p>
 
-    <div class="row g-4">
-
-        <!-- Logo du Salon -->
-        <div class="col-lg-6">
-            <div class="card shadow-lg rounded-4 p-4 bg-light bg-opacity-75">
-                <h4 class="mb-3 text-primary fw-semibold">Logo du Salon</h4>
-                <p>Téléversez le logo du salon pour l'afficher dans la navbar.</p>
-                <div class="text-center mb-3">
-                    <img id="logoPreview" src="/static/images/default_logo.png" alt="Logo"
-                        class="img-fluid rounded-circle border border-2 border-primary" style="max-width:150px;">
-                </div>
-                <input type="file" id="logoInput" class="form-control mb-3" accept="image/*">
-                <button id="saveLogoBtn" class="btn btn-primary w-100 fw-semibold">Enregistrer le Logo</button>
-            </div>
+        <!-- Logo -->
+        <div class="text-center mb-3">
+          <img id="logoPreview" src="/static/images/default_logo.png" 
+               class="img-fluid rounded-circle border border-2 border-primary" 
+               style="max-width:150px;" alt="Logo">
         </div>
+        <input type="file" id="logoInput" class="form-control mb-3" accept="image/*">
+        <button id="saveLogoBtn" class="btn btn-primary mb-4 w-100">Enregistrer le Logo</button>
 
-        <!-- Infos personnelles -->
-        <div class="col-lg-6">
-            <div class="card shadow-lg rounded-4 p-4 bg-light bg-opacity-75">
-                <h4 class="mb-3 text-success fw-semibold">Informations personnelles</h4>
-                <form id="profileForm" novalidate>
-                    <div class="mb-3">
-                        <label for="name" class="form-label fw-semibold">Nom complet</label>
-                        <input type="text" class="form-control rounded-pill" id="name" placeholder="Nom complet" required>
-                        <div class="invalid-feedback">Veuillez entrer votre nom.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label fw-semibold">Email</label>
-                        <input type="email" class="form-control rounded-pill" id="email" placeholder="Email" required>
-                        <div class="invalid-feedback">Veuillez entrer un email valide.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="maxPoste" class="form-label fw-semibold">Nombre max de postes</label>
-                        <input type="number" class="form-control rounded-pill" id="maxPoste" min="1" required>
-                        <div class="invalid-feedback">Veuillez entrer un nombre valide.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label fw-semibold">Rôle</label>
-                        <select id="role" class="form-select rounded-pill">
-                            <option value="COIFFEUR">Coiffeur</option>
-                            <option value="RECEPTIONNISTE">Réceptionniste</option>
-                            <option value="ADMIN">Administrateur</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100 fw-semibold">Enregistrer</button>
-                </form>
+        <!-- Formulaire -->
+        <form id="profileForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nom du salon</label>
+              <input type="text" id="name" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer le nom du salon.</div>
             </div>
-        </div>
 
-        <!-- Changement de mot de passe -->
-        <div class="col-lg-6">
-            <div class="card shadow-lg rounded-4 p-4 bg-light bg-opacity-75">
-                <h4 class="mb-3 text-warning fw-semibold">Sécurité / Changer le mot de passe</h4>
-                <form id="passwordForm" novalidate>
-                    <div class="mb-3">
-                        <label for="currentPassword" class="form-label fw-semibold">Mot de passe actuel</label>
-                        <input type="password" class="form-control rounded-pill" id="currentPassword" placeholder="Mot de passe actuel" required>
-                        <div class="invalid-feedback">Veuillez entrer votre mot de passe actuel.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="newPassword" class="form-label fw-semibold">Nouveau mot de passe</label>
-                        <input type="password" class="form-control rounded-pill" id="newPassword" placeholder="Nouveau mot de passe" minlength="6" required>
-                        <div class="invalid-feedback">Le mot de passe doit contenir au moins 6 caractères.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label fw-semibold">Confirmer le nouveau mot de passe</label>
-                        <input type="password" class="form-control rounded-pill" id="confirmPassword" placeholder="Confirmer le mot de passe" required>
-                        <div class="invalid-feedback">Les mots de passe ne correspondent pas.</div>
-                    </div>
-                    <button type="submit" class="btn btn-warning w-100 fw-semibold">Changer le mot de passe</button>
-                </form>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email</label>
+              <input type="email" id="email" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer un email valide.</div>
             </div>
-        </div>
 
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Téléphone</label>
+              <input type="text" id="telephone" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer un numéro valide.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Localisation (optionnelle)</label>
+              <input type="url" id="localisation" class="form-control rounded-pill" placeholder="https://maps.google.com/...">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Adresse (optionnelle)</label>
+              <input type="text" id="adresse" class="form-control rounded-pill">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre max de postes</label>
+              <input type="number" id="maxPoste" class="form-control rounded-pill" min="1">
+              <div class="invalid-feedback">Veuillez entrer un nombre valide.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success mt-4 w-100">Enregistrer les informations</button>
+        </form>
+      </div>
     </div>
+
+  </div>
 </div>
 
-<style>
-/* Effet de survol sur les cartes */
-.card:hover {
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
-}
-
-/* Ombre plus douce */
-.card {
-    transition: box-shadow 0.3s ease;
-}
-
-/* Input focus */
-.form-control:focus, .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
-}
-
-/* Boutons arrondis et hover */
-.btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    transition: all 0.2s ease;
-}
-</style>
-
+<!-- JS -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+  const logoInput = document.getElementById("logoInput");
+  const logoPreview = document.getElementById("logoPreview");
+  const saveLogoBtn = document.getElementById("saveLogoBtn");
+  const profileForm = document.getElementById("profileForm");
+  const toggleThemeBtn = document.getElementById("toggleThemeBtn");
+  const token = localStorage.getItem("access_token");
 
-    const logoInput = document.getElementById("logoInput");
-    const logoPreview = document.getElementById("logoPreview");
-    const saveLogoBtn = document.getElementById("saveLogoBtn");
-    const profileForm = document.getElementById("profileForm");
-    const passwordForm = document.getElementById("passwordForm");
+  // --- Theme toggle ---
+  const applyTheme = (theme) => {
+    if(theme === "dark"){
+      document.body.classList.add("dark-mode");
+      toggleThemeBtn.textContent = "☀️ Mode Clair";
+    } else {
+      document.body.classList.remove("dark-mode");
+      toggleThemeBtn.textContent = "🌙 Mode Sombre";
+    }
+  };
 
-    // Aperçu logo avant upload
-    logoInput.addEventListener("change", function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = e => logoPreview.src = e.target.result;
-            reader.readAsDataURL(file);
-        }
-    });
+  const savedTheme = localStorage.getItem("theme") || "light";
+  applyTheme(savedTheme);
 
-    // Enregistrer logo
-    saveLogoBtn.addEventListener("click", async () => {
-        const file = logoInput.files[0];
-        if (!file) return alert("Veuillez choisir un fichier.");
-        const formData = new FormData();
-        formData.append("logo", file);
+  toggleThemeBtn.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    toggleThemeBtn.textContent = isDark ? "☀️ Mode Clair" : "🌙 Mode Sombre";
+  });
 
-        const token = localStorage.getItem("access_token");
-        try {
-            const res = await fetch("/api/settings/logo/", {
-                method: "POST",
-                headers: { "Authorization": "Bearer " + token },
-                body: formData
-            });
-            if (!res.ok) throw new Error("Erreur lors de l'enregistrement du logo.");
-            alert("Logo enregistré avec succès !");
-        } catch(err) {
-            console.error(err);
-            alert(err.message);
-        }
-    });
+  // --- Pré-remplir formulaire avec les infos existantes ---
+  const fillProfileForm = async () => {
+    try {
+      const res = await fetch("/api/settings/profile/", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if(!res.ok) throw new Error("Impossible de récupérer les infos du salon.");
+      const data = await res.json();
 
-    // Enregistrer infos personnelles
-    profileForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        profileForm.classList.add("was-validated");
-        if (!profileForm.checkValidity()) return;
+      if(data.nom) document.getElementById("name").value = data.nom;
+      if(data.email) document.getElementById("email").value = data.email;
+      if(data.telephone) document.getElementById("telephone").value = data.telephone;
+      if(data.localisation) document.getElementById("localisation").value = data.localisation;
+      if(data.adresse) document.getElementById("adresse").value = data.adresse;
+      if(data.max_postes) document.getElementById("maxPoste").value = data.max_postes;
 
-        const data = {
-            name: document.getElementById("name").value,
-            email: document.getElementById("email").value,
-            max_poste: document.getElementById("maxPoste").value,
-            role: document.getElementById("role").value
-        };
+      if(data.logo) logoPreview.src = data.logo;
 
-        const token = localStorage.getItem("access_token");
-        try {
-            const res = await fetch("/api/settings/profile/", {
-                method: "PUT",
-                headers: {
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
-            if (!res.ok) throw new Error("Erreur lors de l'enregistrement des infos.");
-            alert("Informations enregistrées avec succès !");
-        } catch(err) {
-            console.error(err);
-            alert(err.message);
-        }
-    });
+    } catch(err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
 
-    // Changement mot de passe
-    passwordForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        passwordForm.classList.add("was-validated");
+  fillProfileForm(); // Appel au chargement
 
-        const current = document.getElementById("currentPassword").value;
-        const newP = document.getElementById("newPassword").value;
-        const confirm = document.getElementById("confirmPassword").value;
+  // --- Logo preview ---
+  logoInput.addEventListener("change", () => {
+    const file = logoInput.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e => logoPreview.src = e.target.result;
+      reader.readAsDataURL(file);
+    }
+  });
 
-        if (!passwordForm.checkValidity()) return;
-        if (newP !== confirm) {
-            document.getElementById("confirmPassword").setCustomValidity("Les mots de passe ne correspondent pas.");
-            passwordForm.classList.add("was-validated");
-            return;
+  // --- Enregistrer logo ---
+  saveLogoBtn.addEventListener("click", async () => {
+    const file = logoInput.files[0];
+    if(!file) return alert("Veuillez choisir un fichier.");
+    const formData = new FormData();
+    formData.append("logo", file);
+
+    try {
+      const res = await fetch("/api/settings/logo/", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: formData
+      });
+      if(!res.ok) throw new Error("Erreur lors de l'enregistrement du logo.");
+      alert("Logo enregistré avec succès !");
+    } catch(err) { alert(err.message); console.error(err); }
+  });
+
+  // --- Enregistrer infos salon ---
+  profileForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    profileForm.classList.add("was-validated");
+
+    const data = {};
+    const fields = ["name","email","telephone","localisation","adresse","maxPoste"];
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if(el && el.value.trim() !== ""){
+        if(f === "maxPoste") {
+          const val = parseInt(el.value);
+          if(!isNaN(val)) data["max_postes"] = val;
         } else {
-            document.getElementById("confirmPassword").setCustomValidity("");
+          data[f === "name" ? "nom" : f] = el.value.trim();
         }
-
-        const token = localStorage.getItem("access_token");
-        try {
-            const res = await fetch("/api/settings/change-password/", {
-                method: "PUT",
-                headers: {
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ current_password: current, new_password: newP })
-            });
-            if (!res.ok) throw new Error("Erreur lors du changement de mot de passe.");
-            alert("Mot de passe changé avec succès !");
-            passwordForm.reset();
-        } catch(err) {
-            console.error(err);
-            alert(err.message);
-        }
+      }
     });
+
+    if(Object.keys(data).length === 0){
+      return alert("Veuillez remplir au moins un champ avant d'enregistrer.");
+    }
+
+    try {
+      const res = await fetch("/api/settings/profile/", {
+        method: "PUT",
+        headers: { 
+          "Authorization": "Bearer " + token, 
+          "Content-Type": "application/json" 
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if(!res.ok) throw new Error(result.error || "Erreur lors de l'enregistrement des infos.");
+      alert("Informations enregistrées avec succès !");
+    } catch(err) { alert(err.message); console.error(err); }
+  });
 
 });
 </script>
 
+<!-- Styles mode sombre -->
+<style>
+body.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+body.dark-mode .card {
+  background-color: #1f1f1f;
+  color: #f1f1f1;
+  border-color: #333;
+}
+body.dark-mode .form-control, 
+body.dark-mode textarea, 
+body.dark-mode select {
+  background-color: #1f1f1f;
+  color: #f1f1f1;
+  border-color: #333;
+}
+body.dark-mode .btn {
+  opacity: 0.9;
+}
+body.dark-mode .sidebar {
+  background-color: #212529;
+}
+body.dark-mode .sidebar a {
+  color: #f1f1f1;
+}
+body.dark-mode .sidebar a:hover {
+  background-color: #343a40;
+}
+</style>
 {% endblock %}

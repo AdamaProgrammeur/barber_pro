@@ -10,28 +10,33 @@
     </div>
 </div>
 
-<!-- Bouton Ajouter -->
-<button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addClientModal">
-    <i class="fa fa-plus"></i> Ajouter
-</button>
-<button class="btn btn-primary mb-2">
-    <i class="fa fa-plus"></i> <a href="{% url 'crud_file_page' %}" style="color: white; text-decoration: none;">Ajouter a la file
-</a></button>
+<!-- Boutons actions -->
+<div class="d-flex flex-wrap gap-2 mb-2">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+        <i class="fa fa-plus"></i> Ajouter
+    </button>
+    <a class="btn btn-outline-primary" href="{% url 'crud_file_page' %}">
+        <i class="fa fa-list"></i> Gérer la file
+    </a>
+</div>
 
 
 
 <!-- Tableau des clients -->
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Téléphone</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody id="clientsTableBody"></tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-striped mb-0">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Adresse</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="clientsTableBody"></tbody>
+    </table>
+</div>
 
 <!-- Modal Ajouter Client -->
 <div class="modal fade" id="addClientModal" tabindex="-1">
@@ -41,11 +46,12 @@
                 <div class="modal-header">
                     <h5>Ajouter Client</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+                </div>••••••••••
                 <div class="modal-body">
                     <input type="text" class="form-control mb-2" id="addNom" placeholder="Nom" required>
                     <input type="text" class="form-control mb-2" id="addPrenom" placeholder="Prénom" required>
                     <input type="text" class="form-control mb-2" id="addTelephone" placeholder="Téléphone" required>
+                    <input type="text" class="form-control mb-2" id="addAdresse" placeholder="Adresse" required>
                     <div id="addError" class="text-danger"></div>
                 </div>
                 <div class="modal-footer">
@@ -69,12 +75,13 @@
                     <input type="text" class="form-control mb-2" id="editNom" placeholder="Nom" required>
                     <input type="text" class="form-control mb-2" id="editPrenom" placeholder="Prénom" required>
                     <input type="text" class="form-control mb-2" id="editTelephone" placeholder="Téléphone" required>
+                    <input type="text" class="form-control mb-2" id="editAdresse" placeholder="Adresse" required>
                     <div id="editError" class="text-danger"></div>
                     <input type="hidden" id="editClientId">
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-warning">Modifier</button>
-                </div>
+                </div>••••••••••
             </form>
         </div>
     </div>
@@ -103,7 +110,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("access_token");
-    if (!token) { window.location.href = "/accounts/login/"; return; }
+    if (!token) { window.location.href = "logout/"; return; }
 
     let clientsList = [];
 
@@ -128,6 +135,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${c.nom}</td>
                     <td>${c.prenom}</td>
                     <td>${c.telephone}</td>
+                     <td>${c.adresse}</td>
+
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="openEditModal(${c.id})">✏️</button>
                         <button class="btn btn-sm btn-danger" onclick="openDeleteModal(${c.id})">🗑</button>
@@ -159,6 +168,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const nom = document.getElementById("addNom").value;
         const prenom = document.getElementById("addPrenom").value;
         let telephone = formatTelephone(document.getElementById("addTelephone").value);
+        let adresse = document.getElementById("addAdresse").value;
+
 
         const errMsg = validateNomPrenom(nom, prenom);
         if (errMsg) {
@@ -174,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nom, prenom, telephone })
+            body: JSON.stringify({ nom, prenom, telephone, adresse })
         })
         .then(res => {
             if (!res.ok) return res.json().then(err => { throw err; });
@@ -198,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("editPrenom").value = client.prenom;
         document.getElementById("editTelephone").value = client.telephone;
         document.getElementById("editClientId").value = client.id;
+        document.getElementById("editAdresse").value = client.adresse;
         new bootstrap.Modal(document.getElementById("editClientModal")).show();
     }
 
@@ -209,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const nom = document.getElementById("editNom").value;
         const prenom = document.getElementById("editPrenom").value;
         const telephone = formatTelephone(document.getElementById("editTelephone").value);
+        const adresse = document.getElementById("editAdresse").value;   
 
         const errMsg = validateNomPrenom(nom, prenom);
         if (errMsg) {
@@ -224,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Authorization": "Bearer " + token,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ nom, prenom, telephone })
+            body: JSON.stringify({ nom, prenom, telephone, adresse })
         })
         .then(res => {
             if (!res.ok) return res.json().then(err => { throw err; });

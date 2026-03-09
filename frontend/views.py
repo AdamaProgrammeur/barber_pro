@@ -1,12 +1,22 @@
-from  clients.models import Client
 from django.shortcuts import render
-from file_attente.models import FileAttente
 from django.contrib.auth import logout
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from django.contrib.auth.decorators import login_required
+from django.conf import settings
+
+
+def home_page(request):
+    return render(
+        request,
+        "layout/accueil.html",
+        {"demo_login_enabled": getattr(settings, "DEMO_LOGIN_ENABLED", False)},
+    )
+
+
 def login_page(request):
-    return render(request, "accounts/login.html")
+    return render(
+        request,
+        "accounts/login.html",
+        {"demo_login_enabled": getattr(settings, "DEMO_LOGIN_ENABLED", False)},
+    )
 
 def logout_page(request):
     logout(request)
@@ -17,6 +27,10 @@ def gestion_users_page(request):
 
 def profile_page(request):
     return render(request, "accounts/profile.html")
+
+
+def register_salon_page(request):
+    return render(request, "accounts/register_salon.html")
 
 
 def dashbord_view(request):
@@ -39,13 +53,11 @@ def list_service_page(request):
     return render(request, "services/list_service.html")
 
 def crud_file_page(request):
-    clients = Client.objects.all()
-    return render(request, "file/crud_file.html", {"clients": clients})
+    return render(request, "file/crud_file.html")
+
 
 def gestion_file(request):
-    file = FileAttente.objects.all()
-    return render(request, "file/gestion_file.html", {"files": file})
-
+    return render(request, "file/gestion_file.html")
 def crud_paiement_page(request):
     return render(request, "paiements/crud_paiement.html")
 

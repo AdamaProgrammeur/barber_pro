@@ -16,10 +16,29 @@ class PaiementSerializer(serializers.ModelSerializer):
     # Remplacer montant par le champ FriendlyDecimalField
     montant = FriendlyDecimalField(max_digits=10, decimal_places=2)
 
+    # champs calculés pour la vue JS
+    client_nom = serializers.SerializerMethodField()
+    service_nom = serializers.SerializerMethodField()
+    prix_service = serializers.SerializerMethodField()
+    reste = serializers.SerializerMethodField()
+
     class Meta:
         model = Paiement
-        fields = '__all__'
+        fields = '__all__'  # les champs calculés sont automatiquement inclus
         read_only_fields = ('statut', 'date_paiement')
+
+    def get_client_nom(self, obj):
+        return f"{obj.file_attente.client.nom} {obj.file_attente.client.prenom}"
+
+    def get_service_nom(self, obj):
+        return obj.file_attente.service.nom
+
+    def get_prix_service(self, obj):
+        return obj.file_attente.service.prix
+
+    def get_reste(self, obj):
+        prix = obj.file_attente.service.prix
+        return prix - obj.montant
 
     # 2️⃣ Validation du mode de paiement
     def validate_mode_paiement(self, value):
