@@ -1,0 +1,115 @@
+<nav id="mainNavbar" class="navbar navbar-expand-lg shadow-sm">
+  <div class="container-fluid">
+
+    <!-- Logo + Nom salon -->
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'dashboard_view' %}">
+      <img id="salonLogo"
+           src="/static/images/default_logo.png"
+           class="rounded-circle me-2"
+           style="width:40px;height:40px;object-fit:cover;">
+      <span id="salonName">Salon de Coiffure</span>
+    </a>
+
+    <div class="ms-auto d-flex align-items-center flex-wrap justify-content-end gap-2" id="topActionBar">
+
+      <!-- Bouton Mode -->
+      <button id="toggleThemeBtn" class="btn btn-sm btn-outline-secondary">
+        🌙
+      </button>
+
+      <!-- Menus par rôle -->
+      <div id="adminMenu" style="display:none;">
+        <a href="/dashboard/" class="btn btn-sm btn-primary">Dashboard</a>
+      </div>
+
+      <div id="coiffeurMenu" style="display:none;">
+        <a href="/gestion_file/" class="btn btn-sm btn-warning">File</a>
+      </div>
+
+      <div id="receptionMenu" style="display:none;">
+        <a href="/clients_file/" class="btn btn-sm btn-success">Clients</a>
+      </div>
+
+
+    </div>
+  </div>
+</nav>
+
+<style>
+  #mainNavbar .navbar-brand span {
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 575.98px) {
+    #mainNavbar .container-fluid {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    #mainNavbar .navbar-brand {
+      margin-right: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    #mainNavbar .navbar-brand img {
+      width: 34px !important;
+      height: 34px !important;
+    }
+
+    #topActionBar {
+      gap: 0.35rem !important;
+    }
+
+    #topActionBar .btn {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    try {
+        const response = await fetch("/api/dashboard/", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error("Impossible de récupérer l'utilisateur connecté.");
+
+        const data = await response.json();
+        const user = data.user_connecte;
+
+        if (!user || !user.username) return;
+
+        // Mettre à jour le username
+        const usernameEl = document.getElementById("username");
+        if (usernameEl) usernameEl.textContent = user.username;
+
+        // Montre les menus selon le rôle
+        const role = user.role?.toUpperCase() || "";
+        const roleMenus = {
+            "ADMIN": "adminMenu",
+            "COIFFEUR": "coiffeurMenu",
+            "RECEPTIONNISTE": "receptionMenu"
+        };
+
+        Object.entries(roleMenus).forEach(([r, id]) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = (role === r) ? "block" : "none";
+        });
+
+    } catch (error) {
+        console.error("Erreur récupération utilisateur :", error);
+    }
+});
+</script>

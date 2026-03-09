@@ -1,0 +1,54 @@
+1️⃣ Accounts (authentification / gestion utilisateurs)
+Méthode	Endpoint	Description	Permissions
+GET	/users/	Liste des utilisateurs	Authenticated
+POST	/users/	Créer un nouvel utilisateur	Admin uniquement
+GET	/users/{id}/	Détails d’un utilisateur	Authenticated
+PUT	/users/{id}/	Modifier un utilisateur	Admin uniquement
+PATCH	/users/{id}/	Modifier partiellement un utilisateur	Admin uniquement
+DELETE	/users/{id}/	Supprimer un utilisateur	Admin uniquement
+
+2️⃣ Clients
+| Méthode | Endpoint       | Description            | Permissions          |
+| ------- | -------------- | ---------------------- | -------------------- |
+| GET     | /clients/      | Liste des clients      | Authenticated        |
+| POST    | /clients/      | Créer un client        | Receptionniste/Admin |
+| GET     | /clients/{id}/ | Détails client         | Authenticated        |
+| PUT     | /clients/{id}/ | Modifier client        | Receptionniste/Admin |
+| PATCH   | /clients/{id}/ | Modifier partiellement | Receptionniste/Admin |
+| DELETE  | /clients/{id}/ | Supprimer client       | Admin uniquement     |
+
+3️⃣ Services
+| Méthode | Endpoint        | Description            | Permissions      |
+| ------- | --------------- | ---------------------- | ---------------- |
+| GET     | /services/      | Liste des services     | Authenticated    |
+| POST    | /services/      | Créer un service       | Admin uniquement |
+| GET     | /services/{id}/ | Détails d’un service   | Authenticated    |
+| PUT     | /services/{id}/ | Modifier service       | Admin uniquement |
+| PATCH   | /services/{id}/ | Modifier partiellement | Admin uniquement |
+| DELETE  | /services/{id}/ | Supprimer service      | Admin uniquement |
+
+4️⃣ File d’attente (FileAttente)
+| Méthode | Endpoint                      | Description                      | Permissions          |
+| ------- | ----------------------------- | -------------------------------- | -------------------- |
+| GET     | /file_attente/                | Liste des clients en file        | Authenticated        |
+| POST    | /file_attente/                | Ajouter un client à la file      | Receptionniste/Admin |
+| GET     | /file_attente/{id}/           | Détails d’un client dans la file | Authenticated        |
+| PUT     | /file_attente/{id}/           | Modifier client dans la file     | Receptionniste/Admin |
+| PATCH   | /file_attente/{id}/           | Modifier partiellement           | Receptionniste/Admin |
+| DELETE  | /file_attente/{id}/           | Supprimer de la file             | Admin uniquement     |
+| POST    | /file_attente/{id}/commencer/ | Passer EN_ATTENTE → EN_COURS     | Coiffeur/Admin       |
+| POST    | /file_attente/{id}/terminer/  | Passer EN_COURS → TERMINE        | Coiffeur/Admin       |
+
+
+5️⃣ Paiements
+Méthode	Endpoint	Description	Permissions
+GET	/paiements/	Liste des paiements	Authenticated
+POST	/paiements/	Créer un paiement	Coiffeur/Admin
+GET	/paiements/{id}/	Détails d’un paiement	Authenticated
+PUT	/paiements/{id}/	Modifier paiement	Coiffeur/Admin
+PATCH	/paiements/{id}/	Modifier partiellement	Coiffeur/Admin
+DELETE	/paiements/{id}/	Supprimer paiement	Admin uniquement
+
+6️⃣ Dashboard
+Méthode	Endpoint	Description	Permissions
+GET	/dashboard/	Statistiques globales (clients, paiements, utilisateurs)	Admin uniquement
