@@ -22,18 +22,18 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
     path('', include('frontend.urls')),  # routes frontend
     path('api/', include('clients.urls')),
     path('api/', include('services.urls')),
     path('api/', include('paiements.urls')),
     path('api/', include('file_attente.urls')),
-    path('api/', include('accounts.urls')),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('', include('salon.urls')),   # 🔹 inclure les URLs du salon
+    
     path('api/', include('dashbord.urls')),
     path('accounts/', include('user_profile.urls')),
 
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-#static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-]
 
 

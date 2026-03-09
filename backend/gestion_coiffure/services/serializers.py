@@ -6,7 +6,7 @@ from .models import Service
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = "__all__"
+        fields = '__all__'
 
     def validate_prix(self, value):
         if value <= 0:

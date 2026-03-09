@@ -1,0 +1,226 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">💳 Gestion des Paiements</h3>
+
+    <!-- Alert Bootstrap -->
+    <div id="alert-container"></div>
+
+    <div class="row">
+
+        <!-- ================= CLIENT INFO ================= -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    Informations Client
+                </div>
+                <div class="card-body">
+                    <p><strong>Client :</strong> <span id="client-nom">—</span></p>
+                    <p><strong>Service :</strong> <span id="client-service">—</span></p>
+                    <p><strong>Montant total :</strong> <span id="client-prix">—</span></p>
+                    <p><strong>Montant payé :</strong> <span id="client-montant-paye">—</span></p>
+                    <p><strong>Reste à payer :</strong> <span id="client-reste">—</span></p>
+                    <p><strong>Statut :</strong> <span id="client-statut">—</span></p>
+                    <p><strong>Heure début :</strong> <span id="client-debut">—</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= FORMULAIRE ================= -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    Nouveau Paiement
+                </div>
+                <div class="card-body">
+
+                    <form id="paiement-form">
+
+                        <!-- Client -->
+                        <div class="mb-3">
+                            <label class="form-label">Client non payer</label>
+                            <select id="client-select" class="form-select" required>
+                                <option value="">-- Sélectionner un client --</option>
+                            </select>
+                        </div>
+
+                        <!-- Montant -->
+                        <div class="mb-3">
+                            <label class="form-label">Montant</label>
+                            <input type="number" class="form-control" id="montant" min="0" required>
+                        </div>
+
+                        <!-- Mode -->
+                        <div class="mb-3">
+                            <label class="form-label">Mode de paiement</label>
+                            <select id="mode" class="form-select" required>
+                                <option value="ESPECE">Espèce</option>
+                                <option value="ORANGE_MONEY">Orange Money</option>
+                                <option value="MOOV">Moov Africa</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100" id="paiement-btn">
+                            💳 Valider le paiement
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("Session expirée, reconnectez-vous !");
+        return;
+    }
+
+    const clientSelect = document.getElementById("client-select");
+    const montantInput = document.getElementById("montant");
+    const modeSelect = document.getElementById("mode");
+    const btnPaiement = document.getElementById("paiement-btn");
+
+    let clientsData = [];
+
+    // ------------------ Afficher alert ------------------
+    function showAlert(message, type="danger") {
+        const container = document.getElementById("alert-container");
+        container.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+    }
+
+    // ------------------ Charger les clients NON PAYÉS ------------------
+    async function loadClients() {
+        try {
+            const res = await fetch("/api/paiements/", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            if (!res.ok) throw new Error("Impossible de charger les clients.");
+
+            const data = await res.json();
+
+            // Filtrer uniquement les clients avec reste > 0
+            clientsData = data.filter(c => c.reste > 0);
+
+            // Remplir le select
+            clientSelect.innerHTML = '<option value="">-- Sélectionner un client --</option>';
+            clientsData.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c.file_attente; // id du file_attente
+                opt.textContent = `${c.client_nom} (${c.service_nom}) - Reste: ${c.reste} FCFA`;
+                clientSelect.appendChild(opt);
+            });
+
+        } catch (err) {
+            showAlert(err.message);
+        }
+    }
+    loadClients();
+
+    // ------------------ Afficher infos client sélectionné ------------------
+    clientSelect.addEventListener("change", function () {
+        const id = this.value;
+        if (!id) return resetClientInfo();
+
+        const client = clientsData.find(c => c.file_attente == id);
+        if (!client) {
+            resetClientInfo();
+            showAlert("Client introuvable !");
+            return;
+        }
+
+        document.getElementById("client-nom").textContent = client.client_nom;
+        document.getElementById("client-service").textContent = client.service_nom;
+        document.getElementById("client-prix").textContent = client.prix_service;
+        document.getElementById("client-montant-paye").textContent = client.montant_paye;
+        document.getElementById("client-reste").textContent = client.reste;
+        document.getElementById("client-statut").textContent = client.statut;
+        document.getElementById("client-debut").textContent = client.date_debut;
+
+        btnPaiement.disabled = (client.reste <= 0);
+    });
+
+    function resetClientInfo() {
+        document.getElementById("client-nom").textContent = "—";
+        document.getElementById("client-service").textContent = "—";
+        document.getElementById("client-prix").textContent = "—";
+        document.getElementById("client-montant-paye").textContent = "—";
+        document.getElementById("client-reste").textContent = "—";
+        document.getElementById("client-statut").textContent = "—";
+        document.getElementById("client-debut").textContent = "—";
+        btnPaiement.disabled = false;
+    }
+
+    // ------------------ Soumission Paiement ------------------
+    document.getElementById("paiement-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const clientId = clientSelect.value;
+        const montant = parseFloat(montantInput.value);
+        const mode = modeSelect.value;
+
+        if (!clientId) { showAlert("Sélectionnez un client !"); return; }
+        if (montant <= 0) { showAlert("Montant invalide !"); return; }
+
+        try {
+            const res = await fetch("/api/paiements/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({
+                    file_attente: clientId,
+                    montant: montant,
+                    mode_paiement: mode
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                showAlert(data.error || "Erreur lors du paiement.");
+                return;
+            }
+
+            showAlert(
+                `Paiement enregistré. Montant payé : ${data.montant_paye}, reste : ${data.reste}`,
+                "success"
+            );
+
+            // Mettre à jour infos client
+            const client = clientsData.find(c => c.file_attente == clientId);
+            if (client) {
+                client.montant_paye = data.montant_paye;
+                client.reste = data.reste;
+                client.statut = data.statut;
+            }
+
+            document.getElementById("client-montant-paye").textContent = data.montant_paye;
+            document.getElementById("client-reste").textContent = data.reste;
+            document.getElementById("client-statut").textContent = data.statut;
+
+            // Désactiver si payé entièrement
+            if (data.reste <= 0) btnPaiement.disabled = true;
+
+            document.getElementById("paiement-form").reset();
+            loadClients(); // rafraîchir la liste clients non payés
+
+        } catch (err) {
+            showAlert("Erreur réseau ou serveur.");
+            console.error(err);
+        }
+    });
+});
+</script>
+{% endblock %}

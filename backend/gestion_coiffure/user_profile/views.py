@@ -15,7 +15,7 @@ class ProfileViewSet(viewsets.ViewSet):
             "email": user.email,
             "username": user.username,
             "is_admin": user.is_superuser,
-            # "max_postes": getattr(user.profile, "max_postes", None)
+             "max_postes": getattr(user.profile, "max_postes", None)
         })
 
     def partial_update(self, request, pk=None):

@@ -5,8 +5,8 @@
 
 <div class="row g-3">
 
-    <!-- Clients -->
-    <div class="col-lg-3 col-6">
+    <!-- Ligne 1 : Clients -->
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-info text-white p-3">
             <div class="inner">
                 <h3 id="totalClients">0</h3>
@@ -18,8 +18,7 @@
         </div>
     </div>
 
-    <!-- En Attente -->
-    <div class="col-lg-3 col-6">
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-warning text-dark p-3">
             <div class="inner">
                 <h3 id="totalAttente">0</h3>
@@ -31,8 +30,7 @@
         </div>
     </div>
 
-    <!-- En Cours -->
-    <div class="col-lg-3 col-6">
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-primary text-white p-3">
             <div class="inner">
                 <h3 id="totalEncours">0</h3>
@@ -44,8 +42,11 @@
         </div>
     </div>
 
-    <!-- Terminés -->
-    <div class="col-lg-3 col-6">
+</div>
+
+<div class="row g-3 mt-3">
+    <!-- Ligne 2 : Terminés + Paiements Aujourd'hui + Somme Paiements Aujourd'hui -->
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-success text-white p-3">
             <div class="inner">
                 <h3 id="totalTermine">0</h3>
@@ -57,12 +58,7 @@
         </div>
     </div>
 
-</div>
-
-<div class="row g-3 mt-3">
-
-    <!-- Paiements Aujourd'hui -->
-    <div class="col-lg-3 col-6">
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-secondary text-white p-3">
             <div class="inner">
                 <h3 id="paiementsToday">0</h3>
@@ -74,12 +70,38 @@
         </div>
     </div>
 
-    <!-- Coiffeurs Total -->
-    <div class="col-lg-3 col-6">
+    <div class="col-lg-4 col-12">
+        <div class="small-box bg-secondary text-white p-3">
+            <div class="inner">
+                <h3 id="sommePaiementsToday">0</h3>
+                <p>Somme Paiements Aujourd'hui</p>
+            </div>
+            <div class="icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <!-- Ligne 3 : Somme Paiements Totale + Coiffeurs + Réceptionnistes -->
+    <div class="col-lg-4 col-12">
+        <div class="small-box bg-secondary text-white p-3">
+            <div class="inner">
+                <h3 id="sommePaiementsTotal">0</h3>
+                <p>Somme Paiements Totale</p>
+            </div>
+            <div class="icon">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-dark text-white p-3">
             <div class="inner">
                 <h3 id="totalCoiffeurs">0</h3>
-                <p>Coiffeurs Total</p>
+                <p>Administrateurs</p>
             </div>
             <div class="icon">
                 <i class="fa-solid fa-user-tie"></i>
@@ -87,8 +109,7 @@
         </div>
     </div>
 
-    <!-- Réceptionnistes -->
-    <div class="col-lg-3 col-6">
+    <div class="col-lg-4 col-12">
         <div class="small-box bg-danger text-white p-3">
             <div class="inner">
                 <h3 id="totalReceptions">0</h3>
@@ -99,7 +120,48 @@
             </div>
         </div>
     </div>
-
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Tu n'es pas connecté. Connecte-toi pour accéder au dashboard.");
+        return;
+    }
+
+    fetch("/api/dashboard/", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    })
+    .then(async response => {
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(payload.error || `Impossible de charger le dashboard (HTTP ${response.status}).`);
+        }
+        return payload;
+    })
+    .then(data => {
+        document.getElementById("totalClients").textContent = data.clients.total;
+        document.getElementById("totalAttente").textContent = data.clients.en_attente;
+        document.getElementById("totalEncours").textContent = data.clients.en_cours;
+        document.getElementById("totalTermine").textContent = data.clients.termine;
+
+        document.getElementById("paiementsToday").textContent = data.paiements.count_today;
+        document.getElementById("sommePaiementsToday").textContent = data.paiements.total_amount_today + " FCFA";
+        document.getElementById("sommePaiementsTotal").textContent = data.paiements.total_amount_all + " FCFA";
+
+        document.getElementById("totalCoiffeurs").textContent = data.users.administrateurs;
+        document.getElementById("totalReceptions").textContent = data.users.receptionnistes;
+    })
+    .catch(error => {
+        console.error("Erreur dashboard :", error);
+        alert(error.message || "Erreur dashboard.");
+    });
+});
+</script>
 {% endblock %}

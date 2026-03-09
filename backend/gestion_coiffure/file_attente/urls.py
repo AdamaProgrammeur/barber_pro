@@ -1,13 +1,12 @@
-from django.urls import path
+# urls.py
+# file_attente/urls.py
+from rest_framework.routers import DefaultRouter
 from .views import FileAttenteViewSet
 
-app_name = 'file'
+router = DefaultRouter()
+router.register(r'file_attente', FileAttenteViewSet, basename='file_attente')
 
-urlpatterns = [
-    path('', FileAttenteViewSet.as_view({'get': 'list'}), name='list'),
-]
-
-
+urlpatterns = router.urls
 '''Avec cette configuration :
 
 Action	URL	Méthode

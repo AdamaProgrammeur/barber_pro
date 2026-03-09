@@ -1,0 +1,214 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<h2>CRUD Services</h2>
+
+<!-- Recherche -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un service...">
+    </div>
+</div>
+
+<!-- Ajouter service -->
+<button class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+    <i class="fa fa-plus"></i> Ajouter
+</button>
+
+<!-- Tableau services -->
+<div class="table-responsive">
+  <table class="table table-striped mb-0">
+      <thead>
+          <tr>
+              <th>Nom</th>
+              <th>Prix</th>
+              <th>Image</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody id="servicesTableBody"></tbody>
+  </table>
+</div>
+
+<!-- Modal Ajouter -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addServiceForm">
+        <div class="modal-header">
+          <h5>Ajouter Service</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="addNom" class="form-control mb-2" placeholder="Nom">
+          <input type="number" id="addPrix" class="form-control mb-2" placeholder="Prix">
+          <input type="file" id="addImage" class="form-control mb-2">
+          <div id="addError" class="text-danger"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Modifier -->
+<div class="modal fade" id="editServiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editServiceForm">
+        <div class="modal-header">
+          <h5>Modifier Service</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="editNom" class="form-control mb-2" placeholder="Nom" required>
+          <input type="number" id="editPrix" class="form-control mb-2" placeholder="Prix" required>
+          <input type="file" id="editImage" class="form-control mb-2">
+          <div id="editError" class="text-danger"></div>
+          <input type="hidden" id="editServiceId">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Modifier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Supprimer -->
+<div class="modal fade" id="deleteServiceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5>Supprimer Service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Voulez-vous vraiment supprimer ce service ?</p>
+        <input type="hidden" id="deleteServiceId">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("access_token");
+    if (!token) { window.location.href = "/login/"; return; }
+
+    let servicesList = [];
+
+    // 🔹 Charger services
+    function loadServices() {
+        fetch("/api/services/", { headers: { "Authorization": "Bearer " + token } })
+        .then(res => res.json())
+        .then(data => {
+            servicesList = data;
+            renderServices(data);
+        });
+    }
+
+    // 🔹 Afficher services
+    function renderServices(data) {
+        const tbody = document.getElementById("servicesTableBody");
+        tbody.innerHTML = "";
+        data.forEach(s => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${s.nom}</td>
+                    <td>${s.prix}</td>
+                    <td>${s.image ? `<img src="${s.image}" width="50">` : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal(${s.id})">✏️</button>
+                        <button class="btn btn-sm btn-danger" onclick="openDeleteModal(${s.id})">🗑</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // 🔹 Validation
+    function validateService(nom, prix) {
+        if (!nom.trim()) return "Le nom est requis.";
+        if (!prix || Number(prix) <= 0) return "Le prix doit être > 0.";
+        return null;
+    }
+
+    // 🔹 Ajouter service
+    const addModal = new bootstrap.Modal(document.getElementById("addServiceModal"));
+    document.getElementById("addServiceForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const nom = document.getElementById("addNom").value;
+        const prix = document.getElementById("addPrix").value;
+        const file = document.getElementById("addImage").files[0];
+
+        const err = validateService(nom, prix);
+        if (err) { document.getElementById("addError").innerText = err; return; }
+
+        const formData = new FormData();
+        formData.append("nom", nom);
+        formData.append("prix", prix);
+        if (file) formData.append("image", file);
+
+        fetch("/api/services/", { method: "POST", headers: { "Authorization": "Bearer " + token }, body: formData })
+        .then(() => { loadServices(); this.reset(); addModal.hide(); });
+    });
+
+    // 🔹 Modifier service
+    window.openEditModal = function(id) {
+        const s = servicesList.find(s => s.id === id);
+        if (!s) return;
+        document.getElementById("editNom").value = s.nom;
+        document.getElementById("editPrix").value = s.prix;
+        document.getElementById("editServiceId").value = s.id;
+        new bootstrap.Modal(document.getElementById("editServiceModal")).show();
+    }
+
+    const editModal = new bootstrap.Modal(document.getElementById("editServiceModal"));
+    document.getElementById("editServiceForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const id = document.getElementById("editServiceId").value;
+        const nom = document.getElementById("editNom").value;
+        const prix = document.getElementById("editPrix").value;
+        const file = document.getElementById("editImage").files[0];
+
+        const err = validateService(nom, prix);
+        if (err) { document.getElementById("editError").innerText = err; return; }
+
+        const formData = new FormData();
+        formData.append("nom", nom);
+        formData.append("prix", prix);
+        if (file) formData.append("image", file);
+
+        fetch(`/api/services/${id}/`, { method: "PUT", headers: { "Authorization": "Bearer " + token }, body: formData })
+        .then(() => { loadServices(); editModal.hide(); });
+    });
+
+    // 🔹 Supprimer service
+    window.openDeleteModal = function(id) {
+        document.getElementById("deleteServiceId").value = id;
+        new bootstrap.Modal(document.getElementById("deleteServiceModal")).show();
+    }
+
+    document.getElementById("confirmDeleteBtn").addEventListener("click", function() {
+        const id = document.getElementById("deleteServiceId").value;
+        fetch(`/api/services/${id}/`, { method: "DELETE", headers: { "Authorization": "Bearer " + token } })
+        .then(() => { loadServices(); bootstrap.Modal.getInstance(document.getElementById("deleteServiceModal")).hide(); });
+    });
+
+    // 🔹 Recherche dynamique
+    document.getElementById("searchInput").addEventListener("input", function() {
+        const val = this.value.toLowerCase();
+        renderServices(servicesList.filter(s => s.nom.toLowerCase().includes(val) || String(s.prix).includes(val)));
+    });
+
+    // 🔹 Charger au démarrage
+    loadServices();
+});
+</script>
+{% endblock %}
