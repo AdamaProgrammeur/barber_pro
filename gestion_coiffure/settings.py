@@ -29,7 +29,6 @@ ALLOWED_HOSTS = config(
     cast=Csv()
 )
 
-
 # Application definition
 
 INSTALLED_APPS = [
