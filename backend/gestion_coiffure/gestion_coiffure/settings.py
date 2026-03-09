@@ -11,23 +11,23 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import os
-from decouple import config
-
-DEBUG = config('DEBUG', default=False, cast=bool)
-SECRET_KEY = config('SECRET_KEY')
+from decouple import Csv, config
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+kv_h-ta8s=o@ry&u&5u*7k*r4m$vo&3u0i1&4s2=%npxj=-av'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = ['192.168.0.138', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='127.0.0.1,localhost',
+    cast=Csv(),
+)
 
 
 # Application definition
@@ -54,12 +54,6 @@ INSTALLED_APPS = [
 
 ]
 
-'''
-<!--<a href="{% url 'logout' %}" class="text-danger">
-            <i class="bi bi-box-arrow-right"></i> Déconnexion
-        </a>-->
-        '''
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -72,12 +66,6 @@ MIDDLEWARE = [
 AUTH_USER_MODEL = 'accounts.User'
 
 ROOT_URLCONF = 'gestion_coiffure.urls'
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,8 +93,9 @@ TEMPLATES = [
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,"static")
+    BASE_DIR / "static"
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 
@@ -192,8 +181,8 @@ LOGIN_REDIRECT_URL = 'accounts:redirect_user'
 LOGOUT_REDIRECT_URL = 'login_page'
 
 # Mode demo (test application)
-DEMO_LOGIN_ENABLED = os.getenv("DEMO_LOGIN_ENABLED", str(DEBUG)).lower() in ("1", "true", "yes", "on")
-DEMO_USERNAME = os.getenv("DEMO_USERNAME", "demo_salon")
-DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "demo123456")
-DEMO_EMAIL = os.getenv("DEMO_EMAIL", "demo@salon.local")
-DEMO_SALON_NAME = os.getenv("DEMO_SALON_NAME", "Salon Demo")
+DEMO_LOGIN_ENABLED = str(config('DEMO_LOGIN_ENABLED', default=str(DEBUG))).lower() in ('1', 'true', 'yes', 'on')
+DEMO_USERNAME = config('DEMO_USERNAME', default='demo_salon')
+DEMO_PASSWORD = config('DEMO_PASSWORD', default='demo123456')
+DEMO_EMAIL = config('DEMO_EMAIL', default='demo@salon.local')
+DEMO_SALON_NAME = config('DEMO_SALON_NAME', default='Salon Demo')
