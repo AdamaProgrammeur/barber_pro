@@ -6,7 +6,7 @@
     <div class="text-center py-3 border-bottom">
         <img id="sidebarSalonLogo" src="/static/images/default_logo.png" class="rounded-circle mb-2" alt="Logo Salon" 
              style="width:60px; height:60px; object-fit:cover; border:1px solid #ccc;">
-        <h6 id="sidebarSalonName" class="fw-bold mb-0" style="margin-bottom:0.2rem;">Salon de Coiffure</h6>
+        <h6 id="sidebarSalonName" class="fw-bold mb-0" style="margin-bottom:0.2rem;">BarberPro</h6>
         <p id="sidebarUserName" class="text-muted mb-0" style="font-size:0.9rem;">Utilisateur</p>
     </div>
 
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (resSalon.ok) {
             const dataSalon = await resSalon.json();
             sidebarLogo.src = dataSalon.logo || "/static/images/default_logo.png";
-            sidebarName.textContent = dataSalon.nom || "Salon de Coiffure";
+            sidebarName.textContent = dataSalon.nom || "BarberPro";
         }
     } catch (err) {
         console.error("Erreur récupération salon :", err);
