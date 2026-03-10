@@ -23,10 +23,25 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
 
+# Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
+_default_allowed_hosts = "127.0.0.1,localhost,barber-pro-im2f.onrender.com"
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost,barber-pro-im2f.onrender.com"
-).split(",")  # très important de split pour obtenir une liste
+    default=_default_allowed_hosts,
+    cast=Csv()
+)
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = _default_allowed_hosts.split(",")
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+
+# Render sets this automatically; include it to avoid DisallowedHost.
+_render_hostname = config("RENDER_EXTERNAL_HOSTNAME", default="").strip()
+if _render_hostname and _render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_render_hostname)
+
+# Emergency override for debugging in deployment.
+if str(config("ALLOW_ALL_HOSTS", default="False")).lower() in ("1", "true", "yes", "on"):
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
