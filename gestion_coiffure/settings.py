@@ -25,7 +25,7 @@ DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'o
 
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost,192.168.0.138,barberpro-pc2e.onrender.com",
+    default="127.0.0.1,localhost,192.168.0.138,barberpro-pc2e.onrender.com,barber-pro-im2f.onrender.com",
     cast=Csv()
 )
 
