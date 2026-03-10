@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
-import dj_database_url 
+import dj_database_url
 from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
 
@@ -47,7 +47,6 @@ if _render_hostname and _render_hostname not in ALLOWED_HOSTS:
 # Emergency override for debugging in deployment.
 if str(config("ALLOW_ALL_HOSTS", default="False")).lower() in ("1", "true", "yes", "on"):
     ALLOWED_HOSTS = ["*"]
-
 # Application definition
 
 INSTALLED_APPS = [
