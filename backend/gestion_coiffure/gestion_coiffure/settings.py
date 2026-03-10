@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+
+import dj_database_url
 from decouple import Csv, config
+from django.core.exceptions import ImproperlyConfigured
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,26 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
 
-# Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
-_default_allowed_hosts = "127.0.0.1,localhost,barber-pro-im2f.onrender.com"
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default=_default_allowed_hosts,
-    cast=Csv()
-)
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = _default_allowed_hosts.split(",")
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
-
-# Render sets this automatically; include it to avoid DisallowedHost.
-_render_hostname = config("RENDER_EXTERNAL_HOSTNAME", default="").strip()
-if _render_hostname and _render_hostname not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(_render_hostname)
-
-# Emergency override for debugging in deployment.
-if str(config("ALLOW_ALL_HOSTS", default="False")).lower() in ("1", "true", "yes", "on"):
-    ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 # Application definition
 
 INSTALLED_APPS = [
@@ -118,16 +102,35 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+DATABASE_URL = config("DATABASE_URL", default="").strip()
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    _db_name = config("DB_NAME", default="").strip()
+    _db_user = config("DB_USER", default="").strip()
+    _db_password = config("DB_PASSWORD", default="").strip()
+    _db_host = config("DB_HOST", default="localhost").strip()
+    _db_port = config("DB_PORT", default="5432").strip()
+    if not _db_name or not _db_user or not _db_password:
+        raise ImproperlyConfigured(
+            "Database configuration missing. Set DATABASE_URL or DB_NAME/DB_USER/DB_PASSWORD."
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _db_name,
+            "USER": _db_user,
+            "PASSWORD": _db_password,
+            "HOST": _db_host,
+            "PORT": _db_port,
+        }
+    }
 
 
 # settings.py
