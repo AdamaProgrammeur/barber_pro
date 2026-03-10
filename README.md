@@ -221,6 +221,7 @@ Elle permet aux propriétaires et au personnel de gérer les clients, les servic
 ### 1️⃣ Cloner le projet
 
 ```bash
-git clone https://github.com/AdamaProgrammeur/BarberPro.git
+git clone https://github.com/AdamaProgrammeur/barber_pro.git
 cd BarberPro/backend/gestion_coiffure
+
 >>>>>>> 7bb2ef2db54aef8f0825a9e6bdd464ace979bcc6
