@@ -25,9 +25,8 @@ DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'o
 
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost"
+    default="127.0.0.1,localhost,barber-pro-im2f.onrender.com"
 ).split(",")  # très important de split pour obtenir une liste
-
 
 # Application definition
 
