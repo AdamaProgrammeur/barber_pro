@@ -26,6 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
 
+<<<<<<< HEAD
 # Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
 _default_allowed_hosts = (
     "127.0.0.1,localhost,192.168.0.138,"
@@ -55,6 +56,24 @@ CSRF_TRUSTED_ORIGINS = config(
     default="https://barberpro-pc2e.onrender.com,https://barber-pro-im2f.onrender.com,https://barber-pro-upue.onrender.com",
     cast=Csv(),
 )
+=======
+# ALLOWED_HOSTS (piloté par .env)
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="127.0.0.1,localhost,barber-pro-upue.onrender.com",
+    cast=Csv(),
+)
+
+# CSRF_TRUSTED_ORIGINS (piloté par .env)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://barber-pro-upue.onrender.com",
+    cast=Csv(),
+)
+
+# Si tu veux tester avec n'importe quel domaine temporairement :
+# ALLOWED_HOSTS = ["*"]  # seulement pour tests, pas sûr pour prod
+>>>>>>> origin/master
 # Application definition
 
 INSTALLED_APPS = [
