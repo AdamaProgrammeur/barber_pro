@@ -55,7 +55,6 @@ CSRF_TRUSTED_ORIGINS = config(
     default="https://barberpro-pc2e.onrender.com,https://barber-pro-im2f.onrender.com,https://barber-pro-upue.onrender.com",
     cast=Csv(),
 )
-=======
 # ALLOWED_HOSTS (piloté par .env)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
