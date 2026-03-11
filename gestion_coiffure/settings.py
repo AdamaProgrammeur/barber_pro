@@ -18,12 +18,18 @@ import os
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+kv_h-ta8s=o@ry&u&5u*7k*r4m$vo&3u0i1&4s2=%npxj=-av'
+
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.138', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    "barber-pro-upue.onrender.com",  # Remplace par ton URL Render
+    "barberpro.onrender.com",        # Si tu as plusieurs apps
+    "127.0.0.1",
+    "localhost",
+]
 
 
 # Application definition
