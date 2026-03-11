@@ -60,4 +60,17 @@ class UserSalonSerializer(serializers.ModelSerializer):
 class SalonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Salon
-        fields = ['id', 'nom', 'logo', 'adresse', 'telephone', 'email', 'localisation', 'max_postes', 'date_creation']
+        fields = [
+            'id',
+            'nom',
+            'logo',
+            'adresse',
+            'telephone',
+            'email',
+            'localisation',
+            'max_postes',
+            'date_creation',
+            'status',
+            'paiement_effectue',
+        ]
+        read_only_fields = ['status', 'paiement_effectue']

@@ -7,73 +7,127 @@
     <h2 class="auth-title">Créer votre salon</h2>
     <p class="auth-subtitle">Ouvrez votre compte propriétaire et configurez votre salon en quelques minutes.</p>
 
+    <style>
+        .stepper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0 14px;
+        }
+        .stepper .step {
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.08);
+            background: #f7f7f7;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .stepper .step.active {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+            box-shadow: 0 8px 20px rgba(13,110,253,.25);
+        }
+        .stepper .step.done {
+            background: #e7f1ff;
+            color: #0d6efd;
+            border-color: #b6d4fe;
+        }
+        .step-card {
+            border: 1px solid rgba(0,0,0,.08);
+            border-radius: 12px;
+            padding: 12px;
+            background: #fff;
+        }
+        .step-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+
+    <div class="stepper">
+        <div id="stepIndicator1" class="step active">1. Infos utilisateur</div>
+        <div id="stepIndicator2" class="step">2. Infos salon</div>
+    </div>
+
     <form id="registerSalonForm" class="d-grid gap-2">
-        <div class="row g-2">
-            <div class="col-md-6">
-                <label class="form-label mb-1">Prénom</label>
-                <input type="text" class="form-control" id="first_name" placeholder="Prénom">
+        <div id="stepUser" class="step-card">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Prénom</label>
+                    <input type="text" class="form-control" id="first_name" placeholder="Prénom">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Nom</label>
+                    <input type="text" class="form-control" id="last_name" placeholder="Nom">
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label mb-1">Nom</label>
-                <input type="text" class="form-control" id="last_name" placeholder="Nom">
+
+            <div>
+                <label class="form-label mb-1">Nom d'utilisateur</label>
+                <input type="text" class="form-control" id="username" placeholder="Nom d'utilisateur" required>
             </div>
-        </div>
 
-        <div>
-            <label class="form-label mb-1">Nom d'utilisateur</label>
-            <input type="text" class="form-control" id="username" placeholder="Nom d'utilisateur" required>
-        </div>
-
-        <div>
-            <label class="form-label mb-1">Email</label>
-            <input type="email" class="form-control" id="email" placeholder="Email" required>
-        </div>
-
-        <div class="row g-2">
-            <div class="col-md-6">
-                <label class="form-label mb-1">Mot de passe</label>
-                <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
+            <div>
+                <label class="form-label mb-1">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Email" required>
             </div>
-            <div class="col-md-6">
-                <label class="form-label mb-1">Confirmer</label>
-                <input type="password" class="form-control" id="password_confirm" placeholder="Confirmer" required>
-            </div>
-        </div>
 
-        <hr class="my-2">
-
-        <div>
-            <label class="form-label mb-1">Nom du salon</label>
-            <input type="text" class="form-control" id="salon_nom" placeholder="Nom du salon" required>
-        </div>
-
-        <div>
-            <label class="form-label mb-1">Adresse</label>
-            <input type="text" class="form-control" id="salon_adresse" placeholder="Adresse du salon">
-        </div>
-
-        <div class="row g-2">
-            <div class="col-md-6">
-                <label class="form-label mb-1">Téléphone</label>
-                <input type="text" class="form-control" id="salon_telephone" placeholder="Téléphone du salon">
-            </div>
-            <div class="col-md-6">
-                <label class="form-label mb-1">Email salon</label>
-                <input type="email" class="form-control" id="salon_email" placeholder="Email du salon">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Mot de passe</label>
+                    <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Confirmer</label>
+                    <input type="password" class="form-control" id="password_confirm" placeholder="Confirmer" required>
+                </div>
             </div>
         </div>
 
-        <div>
-            <label class="form-label mb-1">Lien localisation</label>
-            <input type="url" class="form-control" id="salon_localisation" placeholder="Lien Google Maps">
+        <div id="stepSalon" class="step-card hidden">
+            <div>
+                <label class="form-label mb-1">Nom du salon</label>
+                <input type="text" class="form-control" id="salon_nom" placeholder="Nom du salon" required>
+            </div>
+
+            <div>
+                <label class="form-label mb-1">Adresse</label>
+                <input type="text" class="form-control" id="salon_adresse" placeholder="Adresse du salon">
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Téléphone</label>
+                    <input type="text" class="form-control" id="salon_telephone" placeholder="Téléphone du salon">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label mb-1">Email salon</label>
+                    <input type="email" class="form-control" id="salon_email" placeholder="Email du salon">
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label mb-1">Lien localisation</label>
+                <input type="url" class="form-control" id="salon_localisation" placeholder="Lien Google Maps">
+            </div>
+
+            <div>
+                <label class="form-label mb-1">Nombre de postes</label>
+                <input type="number" min="1" class="form-control" id="max_postes" value="1">
+            </div>
         </div>
 
-        <div>
-            <label class="form-label mb-1">Nombre de postes</label>
-            <input type="number" min="1" class="form-control" id="max_postes" value="1">
+        <div class="step-actions">
+            <button id="prevStepBtn" type="button" class="btn btn-soft hidden">Retour</button>
+            <button id="nextStepBtn" type="button" class="btn btn-primary">Suivant</button>
+            <button id="submitBtn" type="submit" class="btn btn-primary hidden">Créer mon salon</button>
         </div>
-
-        <button type="submit" class="btn btn-primary mt-1">Créer mon salon</button>
     </form>
 
     <div class="mt-3 d-flex flex-column flex-sm-row gap-2">
@@ -85,8 +139,83 @@
 </div>
 
 <script>
+const stepUser = document.getElementById("stepUser");
+const stepSalon = document.getElementById("stepSalon");
+const stepIndicator1 = document.getElementById("stepIndicator1");
+const stepIndicator2 = document.getElementById("stepIndicator2");
+const prevStepBtn = document.getElementById("prevStepBtn");
+const nextStepBtn = document.getElementById("nextStepBtn");
+const submitBtn = document.getElementById("submitBtn");
+const formError = document.getElementById("formError");
+
+function setStep(step) {
+    const isStep1 = step === 1;
+    stepUser.classList.toggle("hidden", !isStep1);
+    stepSalon.classList.toggle("hidden", isStep1);
+
+    prevStepBtn.classList.toggle("hidden", isStep1);
+    nextStepBtn.classList.toggle("hidden", !isStep1);
+    submitBtn.classList.toggle("hidden", isStep1);
+
+    stepIndicator1.classList.toggle("active", isStep1);
+    stepIndicator2.classList.toggle("active", !isStep1);
+    stepIndicator1.classList.toggle("done", !isStep1);
+
+    const step1Required = ["username", "email", "password", "password_confirm"];
+    const step2Required = ["salon_nom"];
+
+    step1Required.forEach((id) => {
+        document.getElementById(id).required = isStep1;
+    });
+    step2Required.forEach((id) => {
+        document.getElementById(id).required = !isStep1;
+    });
+}
+
+function showError(message) {
+    formError.textContent = message;
+    formError.style.display = "block";
+}
+
+function clearError() {
+    formError.style.display = "none";
+}
+
+function validateStep1() {
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const passwordConfirm = document.getElementById("password_confirm").value;
+
+    if (!username || !email || !password || !passwordConfirm) {
+        showError("Veuillez remplir tous les champs obligatoires.");
+        return false;
+    }
+    if (password !== passwordConfirm) {
+        showError("Les mots de passe ne correspondent pas.");
+        return false;
+    }
+    return true;
+}
+
+nextStepBtn.addEventListener("click", () => {
+    clearError();
+    if (validateStep1()) {
+        setStep(2);
+    }
+});
+
+prevStepBtn.addEventListener("click", () => {
+    clearError();
+    setStep(1);
+});
+
+setStep(1);
+
 document.getElementById("registerSalonForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    clearError();
 
     const payload = {
         username: document.getElementById("username").value.trim(),
@@ -102,9 +231,6 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
         salon_localisation: document.getElementById("salon_localisation").value.trim(),
         max_postes: Number(document.getElementById("max_postes").value || 1)
     };
-
-    const formError = document.getElementById("formError");
-    formError.style.display = "none";
 
     try {
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {

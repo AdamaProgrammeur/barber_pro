@@ -108,6 +108,8 @@ class RegisterSalonSerializer(serializers.Serializer):
             email=validated_data.get("salon_email", ""),
             localisation=validated_data.get("salon_localisation", ""),
             max_postes=validated_data.get("max_postes", 1),
+            status=Salon.STATUS_PENDING,
+            paiement_effectue=False,
         )
 
         UserSalon.objects.create(user=user, salon=salon, role="admin")

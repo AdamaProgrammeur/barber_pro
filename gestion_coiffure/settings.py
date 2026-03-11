@@ -15,7 +15,7 @@ from pathlib import Path
 import dj_database_url
 from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
-
+from decouple import config
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -24,11 +24,12 @@ from django.core.exceptions import ImproperlyConfigured
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
+DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
 
 # Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
 _default_allowed_hosts = (
-    "127.0.0.1,localhost,192.168.0.138,barberpro-pc2e.onrender.com,barber-pro-im2f.onrender.com"
+    "127.0.0.1,localhost,192.168.0.138,"
+    "barberpro-pc2e.onrender.com,barber-pro-im2f.onrender.com,barber-pro-upue.onrender.com"
 )
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
@@ -47,6 +48,13 @@ if _render_hostname and _render_hostname not in ALLOWED_HOSTS:
 # Emergency override for debugging in deployment.
 if str(config("ALLOW_ALL_HOSTS", default="False")).lower() in ("1", "true", "yes", "on"):
     ALLOWED_HOSTS = ["*"]
+
+# CSRF_TRUSTED_ORIGINS (piloté par .env)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://barberpro-pc2e.onrender.com,https://barber-pro-im2f.onrender.com,https://barber-pro-upue.onrender.com",
+    cast=Csv(),
+)
 # Application definition
 
 INSTALLED_APPS = [

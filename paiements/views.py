@@ -8,6 +8,7 @@ from django.db.models import Q
 from .models import Paiement
 from file_attente.models import FileAttente
 from salon.models import UserSalon
+from salon.permissions import IsSalonActive
 from .serializers import PaiementSerializer
 
 # -------------------------------
@@ -41,7 +42,7 @@ class ReceptionnisteOrAdminPermission(permissions.BasePermission):
 class PaiementViewSet(viewsets.ModelViewSet):
     queryset = Paiement.objects.all()
     serializer_class = PaiementSerializer
-    permission_classes = [ReceptionnisteOrAdminPermission]
+    permission_classes = [IsSalonActive, ReceptionnisteOrAdminPermission]
 
     @staticmethod
     def _get_file_salon(file_obj):

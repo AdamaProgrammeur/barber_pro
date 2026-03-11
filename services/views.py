@@ -3,6 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Service
 from .serializers import ServiceSerializer
 from salon.models import UserSalon
+from salon.permissions import is_salon_active
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
@@ -11,6 +12,8 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
+        if not is_salon_active(request.user):
+            return False
         # Tous les utilisateurs authentifiés peuvent lire
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated

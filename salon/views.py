@@ -6,6 +6,8 @@ from .serializers import (
     UserSalonSerializer,
     SalonSerializer,
 )
+from .permissions import IsSalonActive
+from .permissions import is_salon_active
 
 
 # =========================
@@ -13,7 +15,7 @@ from .serializers import (
 # =========================
 class UserSalonViewSet(viewsets.ModelViewSet):
     serializer_class = UserSalonSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     def get_queryset(self):
         """
@@ -40,7 +42,7 @@ class UserSalonViewSet(viewsets.ModelViewSet):
 # =========================
 class SalonProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = SalonSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     def get_object(self):
         user_salon = UserSalon.objects.filter(user=self.request.user).first()
@@ -53,7 +55,7 @@ class SalonProfileView(generics.RetrieveUpdateAPIView):
 # Récupérer et mettre à jour le logo du salon
 # =========================
 class SalonLogoView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     # Récupérer le logo
     def get(self, request):
@@ -85,3 +87,32 @@ class SalonLogoView(APIView):
             "message": "Logo enregistré avec succès",
             "logo": request.build_absolute_uri(salon.logo.url)
         }, status=status.HTTP_200_OK)
+
+
+# =========================
+# Statut du salon (accessible meme si inactif)
+# =========================
+class SalonStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_salon = UserSalon.objects.filter(user=request.user).first()
+        if not user_salon:
+            return Response({"error": "Salon introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+        salon = user_salon.salon
+        return Response(
+            {
+                "salon_id": salon.id,
+                "salon_nom": salon.nom,
+                "status": salon.status,
+                "paiement_effectue": salon.paiement_effectue,
+                "can_use_app": is_salon_active(request.user),
+                "message": (
+                    "Votre salon n'est pas encore validé par les administrateurs. "
+                    "Merci de patienter ou d'appeler BarbrePro au 223 78746643."
+                ),
+                "contact": "223 78746643",
+            },
+            status=status.HTTP_200_OK,
+        )

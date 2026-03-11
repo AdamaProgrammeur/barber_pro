@@ -2,6 +2,15 @@ from django.db import models
 from django.conf import settings
 
 class Salon(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "En attente"),
+        (STATUS_APPROVED, "Approuvé"),
+        (STATUS_REJECTED, "Refusé"),
+    ]
+
     nom = models.CharField(max_length=150)
     logo = models.ImageField(upload_to="logos/", blank=True, null=True)
     adresse = models.TextField(blank=True)
@@ -10,6 +19,8 @@ class Salon(models.Model):
     localisation = models.URLField(blank=True)
     max_postes = models.PositiveIntegerField(default=1)
     date_creation = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    paiement_effectue = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nom
