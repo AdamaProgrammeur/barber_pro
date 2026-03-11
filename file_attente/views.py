@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from .models import FileAttente
 from salon.models import UserSalon
+from salon.permissions import IsSalonActive
 from .serializers import FileAttenteSerializer
 from paiements.models import Paiement
 from paiements.serializers import PaiementSerializer
@@ -45,11 +46,11 @@ class FileAttenteViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['commencer', 'terminer']:
-            permission_classes = [permissions.IsAuthenticated, ReceptionnisteOrAdminForWork]
+            permission_classes = [permissions.IsAuthenticated, IsSalonActive, ReceptionnisteOrAdminForWork]
         elif self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, ReceptionnisteOrAdmin]
+            permission_classes = [permissions.IsAuthenticated, IsSalonActive, ReceptionnisteOrAdmin]
         else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [permissions.IsAuthenticated, IsSalonActive]
         return [p() for p in permission_classes]
 
     def get_queryset(self):

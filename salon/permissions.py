@@ -1,5 +1,34 @@
 # salon/permissions.py
 from rest_framework import permissions
+from .models import UserSalon, Salon
+
+
+def is_salon_active(user):
+    if not user or not user.is_authenticated:
+        return False
+    if getattr(user, "is_superuser", False):
+        return True
+
+    user_salon = UserSalon.objects.select_related("salon").filter(user=user).first()
+    if not user_salon:
+        return False
+
+    salon = user_salon.salon
+    if salon.status != Salon.STATUS_APPROVED:
+        return False
+    if not salon.paiement_effectue:
+        return False
+    return True
+
+
+class IsSalonActive(permissions.BasePermission):
+    message = (
+        "Votre salon n'est pas encore validé par les administrateurs. "
+        "Merci de patienter ou d'appeler BarbrePro au 223 78746643."
+    )
+
+    def has_permission(self, request, view):
+        return is_salon_active(request.user)
 
 # -------------------------------
 # Permissions basées sur le rôle par salon

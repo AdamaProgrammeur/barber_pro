@@ -2,10 +2,11 @@ from rest_framework import viewsets, permissions
 from .models import Client
 from .serializers import ClientSerializer
 from salon.models import UserSalon
+from salon.permissions import IsSalonActive
 
 class ClientViewSet(viewsets.ModelViewSet):
     serializer_class = ClientSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     def get_queryset(self):
         """

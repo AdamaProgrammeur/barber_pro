@@ -15,7 +15,7 @@ from pathlib import Path
 import dj_database_url
 from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
-
+from decouple import config
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -24,9 +24,24 @@ from django.core.exceptions import ImproperlyConfigured
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
+DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+# ALLOWED_HOSTS (piloté par .env)
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="127.0.0.1,localhost,barber-pro-upue.onrender.com",
+    cast=Csv(),
+)
+
+# CSRF_TRUSTED_ORIGINS (piloté par .env)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://barber-pro-upue.onrender.com",
+    cast=Csv(),
+)
+
+# Si tu veux tester avec n'importe quel domaine temporairement :
+# ALLOWED_HOSTS = ["*"]  # seulement pour tests, pas sûr pour prod
 # Application definition
 
 INSTALLED_APPS = [
