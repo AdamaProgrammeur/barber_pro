@@ -52,10 +52,7 @@ DEBUG = False  # Toujours False en production
 
 # ALLOWED_HOSTS
 ALLOWED_HOSTS = [
-    "barber-pro-upue.onrender.com",  # Remplace par ton URL Render
-    "barberpro.onrender.com",        # Si tu as plusieurs apps
-    "127.0.0.1",
-    "localhost",
+    'barber-pro-upue.onrender.com',
 ]
 
 # Si tu veux tester avec n'importe quel domaine temporairement :
