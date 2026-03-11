@@ -26,7 +26,6 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
 
-<<<<<<< HEAD
 # Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
 _default_allowed_hosts = (
     "127.0.0.1,localhost,192.168.0.138,"
