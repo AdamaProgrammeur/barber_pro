@@ -126,12 +126,13 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("access_token");
+
     if (!token) {
         alert("Tu n'es pas connecté. Connecte-toi pour accéder au dashboard.");
         return;
     }
 
-    // 1️⃣ Récupérer les stats
+    // 1️⃣ Charger les stats du dashboard
     fetch("/api/dashboard/", {
         method: "GET",
         headers: {
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
         alert(error.message || "Erreur dashboard.");
     });
 
-    // 2️⃣ Récupérer le statut du salon
+    // 2️⃣ Vérifier le statut du salon
     fetch("/api/salon/status/", {
         method: "GET",
         headers: {
@@ -183,4 +184,5 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(err => console.error("Erreur statut salon :", err));
 });
 </script>
+
 {% endblock %}
