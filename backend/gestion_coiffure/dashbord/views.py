@@ -7,6 +7,7 @@ from django.db.models import Q
 from file_attente.models import FileAttente
 from paiements.models import Paiement
 from salon.models import UserSalon
+from salon.permissions import is_salon_active
 
 # ---------------------------
 # Permission : admin salon
@@ -14,6 +15,8 @@ from salon.models import UserSalon
 class IsAdminDashboard(permissions.BasePermission):
     """Autorise uniquement l'admin du salon à accéder au dashboard."""
     def has_permission(self, request, view):
+        if not is_salon_active(request.user):
+            return False
         return UserSalon.objects.filter(user=request.user, role='admin').exists()
 
 # ---------------------------

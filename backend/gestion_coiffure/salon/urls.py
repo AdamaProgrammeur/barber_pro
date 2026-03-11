@@ -4,6 +4,7 @@ from .views import (
     UserSalonViewSet,
     SalonLogoView,
     SalonProfileView,
+    SalonStatusView,
 )
 
 router = DefaultRouter()
@@ -15,4 +16,5 @@ urlpatterns = [
     # Endpoints du salon
     path('api/settings/logo/', SalonLogoView.as_view(), name='salon-logo'),
     path('api/settings/profile/', SalonProfileView.as_view(), name='salon-profile'),
+    path('api/settings/status/', SalonStatusView.as_view(), name='salon-status'),
 ]

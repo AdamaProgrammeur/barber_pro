@@ -26,9 +26,40 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config('DEBUG', default='False')).lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS',
+"""ALLOWED_HOSTS = config('ALLOWED_HOSTS',
          default="127.0.0.1,localhost",
+        "https://unideating-sebrina-nonbindingly.ngrok-free.dev"
          cast=Csv())
+         receptionniste = passwordrecept1
+
+
+
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "unideating-sebrina-nonbindingly.ngrok-free.dev"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://unideating-sebrina-nonbindingly.ngrok-free.dev"
+]
+
+#ALLOWED_HOSTS = ["*"]"""
+
+# settings.py
+
+DEBUG = False  # Toujours False en production
+
+# ALLOWED_HOSTS
+ALLOWED_HOSTS = [
+    "barber-pro-upue.onrender.com",  # Remplace par ton URL Render
+    "barberpro.onrender.com",        # Si tu as plusieurs apps
+    "127.0.0.1",
+    "localhost",
+]
+
+# Si tu veux tester avec n'importe quel domaine temporairement :
+# ALLOWED_HOSTS = ["*"]  # seulement pour tests, pas sûr pour prod
 # Application definition
 
 INSTALLED_APPS = [

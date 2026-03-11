@@ -52,3 +52,5 @@ DELETE	/paiements/{id}/	Supprimer paiement	Admin uniquement
 6️⃣ Dashboard
 Méthode	Endpoint	Description	Permissions
 GET	/dashboard/	Statistiques globales (clients, paiements, utilisateurs)	Admin uniquement
+
+dpg-d6o5t4fkijhs73985u9g-a

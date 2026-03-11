@@ -32,9 +32,29 @@
 </div>
 
 <script>
+async function updateSalonStatus(token) {
+    try {
+        const res = await fetch("/api/settings/status/", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+        if (!res.ok) return;
+        const status = await res.json();
+        localStorage.setItem("salon_can_use_app", status.can_use_app ? "true" : "false");
+        if (status.message) {
+            localStorage.setItem("salon_block_message", status.message);
+        }
+    } catch (err) {
+        console.error("Erreur statut salon :", err);
+    }
+}
+
 async function completeLogin(data) {
     localStorage.setItem("access_token", data.access);
     localStorage.setItem("refresh_token", data.refresh);
+
+    await updateSalonStatus(data.access);
 
     const profileRes = await fetch("{% url 'accounts:api:profile' %}", {
         headers: {

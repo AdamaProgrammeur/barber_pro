@@ -185,6 +185,53 @@
             background: #fff;
         }
 
+        .salon-blocked-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .salon-blocked-card {
+            max-width: 520px;
+            width: 100%;
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 18px;
+            padding: 22px 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+            border: 1px solid #e2e8f0;
+        }
+
+        .salon-blocked-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .salon-blocked-text {
+            font-size: 0.98rem;
+            color: #334155;
+            margin-bottom: 0;
+        }
+
+        body.salon-blocked .content,
+        body.salon-blocked .sidebar,
+        body.salon-blocked .navbar {
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        body.salon-blocked {
+            overflow: hidden;
+        }
+
         /* ================= CARDS ================= */
 
         .card,
@@ -248,12 +295,41 @@
 </head>
 
 <body>
+    <script>
+        (function () {
+            const stored = localStorage.getItem("salon_can_use_app");
+            const token = localStorage.getItem("access_token");
+            const blocked = stored === "false" || (stored === null && !!token);
+            window.SALON_BLOCKED = blocked;
+            if (blocked) {
+                const originalAlert = window.alert;
+                window.alert = function () {
+                    const overlayMessage = document.getElementById("salonBlockedMessage");
+                    if (overlayMessage) {
+                        overlayMessage.textContent =
+                            localStorage.getItem("salon_block_message") ||
+                            "Votre salon n'est pas encore validé par les administrateurs. Merci de patienter ou d'appeler BarbrePro au 223 78746643.";
+                    }
+                };
+                window.__originalAlert = originalAlert;
+            }
+        })();
+    </script>
 
     <!-- NAVBAR -->
     {% include "layout/navbar.html" %}
 
     <!-- SIDEBAR -->
     {% include "layout/sidebar.html" %}
+
+    <div id="salonBlockedOverlay" class="salon-blocked-overlay" aria-live="polite">
+        <div class="salon-blocked-card">
+            <div class="salon-blocked-title">Accès en attente</div>
+            <p class="salon-blocked-text" id="salonBlockedMessage">
+                Votre salon n'est pas encore validé par les administrateurs. Merci de patienter ou d'appeler BarbrePro au 223 78746643.
+            </p>
+        </div>
+    </div>
 
     <!-- CONTENT -->
     <div class="content">
@@ -292,6 +368,60 @@
             }
 
         });
+    </script>
+
+    <script>
+        (function () {
+            const token = localStorage.getItem("access_token");
+            const overlay = document.getElementById("salonBlockedOverlay");
+            const messageEl = document.getElementById("salonBlockedMessage");
+            const storedMessage = localStorage.getItem("salon_block_message");
+
+            function applyBlockedState(isBlocked, message) {
+                if (isBlocked) {
+                    document.body.classList.add("salon-blocked");
+                    overlay.style.display = "flex";
+                    if (message) {
+                        messageEl.textContent = message;
+                    }
+                } else {
+                    document.body.classList.remove("salon-blocked");
+                    overlay.style.display = "none";
+                }
+                window.SALON_BLOCKED = isBlocked;
+            }
+
+            applyBlockedState(window.SALON_BLOCKED === true, storedMessage);
+
+            if (!token) return;
+
+            fetch("/api/settings/status/", {
+                headers: { "Authorization": "Bearer " + token }
+            })
+                .then(async (res) => {
+                    if (!res.ok) return null;
+                    return res.json();
+                })
+                .then((status) => {
+                    if (!status) return;
+                    const canUse = !!status.can_use_app;
+                    localStorage.setItem("salon_can_use_app", canUse ? "true" : "false");
+                    if (status.message) {
+                        localStorage.setItem("salon_block_message", status.message);
+                    }
+                    if (!canUse) {
+                        applyBlockedState(true, status.message);
+                        return;
+                    }
+                    localStorage.removeItem("salon_block_message");
+                    if (window.SALON_BLOCKED) {
+                        window.location.reload();
+                    }
+                })
+                .catch((err) => {
+                    console.error("Erreur statut salon :", err);
+                });
+        })();
     </script>
 
 </body>

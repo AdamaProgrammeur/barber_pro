@@ -12,6 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from .serializers import UserSerializer, MyTokenObtainPairSerializer, RegisterSalonSerializer
 from salon.models import Salon, UserSalon
+from salon.permissions import is_salon_active
 from clients.models import Client
 from services.models import Service
 from .permissions import IsAdmin
@@ -35,13 +36,28 @@ def login_view(request):
         token_data = serializer.validated_data
 
         # Récupérer le rôle
+        usersalon = None
         try:
             usersalon = UserSalon.objects.get(user=user)
             role = usersalon.role
         except UserSalon.DoesNotExist:
             role = None
 
-        token_data['user']['role'] = role
+        # Ne pas bloquer la connexion : informer le frontend si le salon est inactif
+        can_use_app = is_salon_active(user)
+
+        token_data["user"]["role"] = role
+        if usersalon:
+            token_data["salon"] = {
+                "status": usersalon.salon.status,
+                "paiement_effectue": usersalon.salon.paiement_effectue,
+                "can_use_app": can_use_app,
+                "contact": "223 78746643",
+                "message": (
+                    "Votre salon n'est pas encore validé par les administrateurs. "
+                    "Merci de patienter ou d'appeler BarbrePro au 223 78746643."
+                ),
+            }
         return Response(token_data)
 
     return Response({"error": "Invalid credentials"}, status=400)
@@ -125,7 +141,10 @@ class RegisterSalonAPIView(APIView):
                 "salon": {
                     "id": salon.id,
                     "nom": salon.nom,
+                    "status": salon.status,
+                    "paiement_effectue": salon.paiement_effectue,
                 },
+                "contact": "223 78746643",
             },
             status=201,
         )
@@ -166,6 +185,10 @@ def demo_login_view(request):
                 adresse="Mode test uniquement",
                 max_postes=3,
             )
+        if salon.status != Salon.STATUS_APPROVED or not salon.paiement_effectue:
+            salon.status = Salon.STATUS_APPROVED
+            salon.paiement_effectue = True
+            salon.save(update_fields=["status", "paiement_effectue"])
 
         user_salon, _ = UserSalon.objects.get_or_create(
             user=user,
