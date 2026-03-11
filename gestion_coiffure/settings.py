@@ -71,7 +71,6 @@ CSRF_TRUSTED_ORIGINS = config(
 
 # Si tu veux tester avec n'importe quel domaine temporairement :
 # ALLOWED_HOSTS = ["*"]  # seulement pour tests, pas sûr pour prod
->>>>>>> origin/master
 # Application definition
 
 INSTALLED_APPS = [
