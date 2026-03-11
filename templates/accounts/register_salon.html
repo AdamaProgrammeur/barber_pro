@@ -233,31 +233,51 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
     };
 
     try {
+
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(payload)
         });
 
         const data = await res.json();
+
         if (!res.ok) {
             const firstError = Object.values(data)[0];
-            const message = Array.isArray(firstError) ? firstError[0] : "Erreur lors de l'inscription.";
+            const message = Array.isArray(firstError)
+                ? firstError[0]
+                : "Erreur lors de l'inscription.";
             throw new Error(message);
         }
 
+        // Stocker les tokens
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
-        const canUseApp = data?.salon?.status === "approved" && data?.salon?.paiement_effectue === true;
-        localStorage.setItem("salon_can_use_app", canUseApp ? "true" : "false");
+
+        // Statut du salon venant du backend
+        const canUseApp = data.can_use_app;
+
+        localStorage.setItem(
+            "salon_can_use_app",
+            canUseApp ? "true" : "false"
+        );
+
+        // Message envoyé par l'API
         localStorage.setItem(
             "salon_block_message",
-            "Votre salon n'est pas encore validé par les administrateurs. Merci de patienter ou d'appeler BarbrePro au 223 78746643."
+            data.message
         );
+
+        // Redirection vers dashboard
         window.location.href = "/dashboard/";
+
     } catch (err) {
+
         formError.textContent = err.message;
         formError.style.display = "block";
+
     }
 });
 </script>

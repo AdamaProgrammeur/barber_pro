@@ -3,8 +3,10 @@
 {% block content %}
 <h1 class="mb-4">Dashboard</h1>
 
-<div class="row g-3">
+<!-- Message d'attente / approbation salon -->
+<div id="salonMessage" class="alert alert-info mt-3" style="display:none;"></div>
 
+<div class="row g-3">
     <!-- Ligne 1 : Clients -->
     <div class="col-lg-4 col-12">
         <div class="small-box bg-info text-white p-3">
@@ -41,7 +43,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <div class="row g-3 mt-3">
@@ -125,12 +126,12 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
         alert("Tu n'es pas connecté. Connecte-toi pour accéder au dashboard.");
         return;
     }
 
+    // 1️⃣ Récupérer les stats
     fetch("/api/dashboard/", {
         method: "GET",
         headers: {
@@ -140,9 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(async response => {
         const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(payload.error || `Impossible de charger le dashboard (HTTP ${response.status}).`);
-        }
+        if (!response.ok) throw new Error(payload.error || `Impossible de charger le dashboard (HTTP ${response.status}).`);
         return payload;
     })
     .then(data => {
@@ -162,6 +161,26 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Erreur dashboard :", error);
         alert(error.message || "Erreur dashboard.");
     });
+
+    // 2️⃣ Récupérer le statut du salon
+    fetch("/api/salon/status/", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(statusData => {
+        const salonMessage = document.getElementById("salonMessage");
+        if (!statusData.can_use_app) {
+            salonMessage.textContent = statusData.message;
+            salonMessage.style.display = "block";
+        } else {
+            salonMessage.style.display = "none";
+        }
+    })
+    .catch(err => console.error("Erreur statut salon :", err));
 });
 </script>
 {% endblock %}
