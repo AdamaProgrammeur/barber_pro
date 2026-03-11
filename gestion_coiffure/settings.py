@@ -29,7 +29,7 @@ DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "o
 # Allow empty env var to fall back to defaults (Render sometimes sets empty vars).
 _default_allowed_hosts = (
     "127.0.0.1,localhost,192.168.0.138,"
-    "barberpro-pc2e.onrender.com,barber-pro-im2f.onrender.com,barber-pro-upue.onrender.com"
+    "barber-pro-upue.onrender.com"
 )
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
