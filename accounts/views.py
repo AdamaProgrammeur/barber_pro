@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 from django.db import transaction
 from rest_framework_simplejwt.tokens import RefreshToken
+import logging
+from rest_framework import status
 
 from .models import User
 from .serializers import UserSerializer, MyTokenObtainPairSerializer, RegisterSalonSerializer
@@ -52,10 +54,10 @@ def login_view(request):
                 "status": usersalon.salon.status,
                 "paiement_effectue": usersalon.salon.paiement_effectue,
                 "can_use_app": can_use_app,
-                "contact": "223 78746643",
+                "contact": "+223 78746643",
                 "message": (
                     "Votre salon n'est pas encore validé par les administrateurs. "
-                    "Merci de patienter ou d'appeler BarbrePro au 223 78746643."
+                    "Merci de patienter ou d'appeler BarbrePro au +223 78746643."
                 ),
             }
         return Response(token_data)
@@ -114,42 +116,58 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]  # ou IsAdmin si restreindre aux admins
 
 
+
+logger = logging.getLogger(__name__)
+
 class RegisterSalonAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = RegisterSalonSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user, salon = serializer.save()
 
-        refresh = RefreshToken.for_user(user)
+        if not serializer.is_valid():
+            # Renvoie toutes les erreurs du serializer en JSON
+            return Response(
+                {"errors": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
-            role = UserSalon.objects.get(user=user, salon=salon).role
-        except UserSalon.DoesNotExist:
-            role = None
+            user, salon = serializer.save()
 
-        return Response(
-            {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "role": role,
+            refresh = RefreshToken.for_user(user)
+            usersalon = UserSalon.objects.filter(user=user, salon=salon).first()
+            role = usersalon.role if usersalon else None
+
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "role": role,
+                    },
+                    "salon": {
+                        "id": salon.id,
+                        "nom": salon.nom,
+                        "status": salon.status,
+                        "paiement_effectue": salon.paiement_effectue,
+                    },
+                    "contact": "+223 78746643",
                 },
-                "salon": {
-                    "id": salon.id,
-                    "nom": salon.nom,
-                    "status": salon.status,
-                    "paiement_effectue": salon.paiement_effectue,
-                },
-                "contact": "223 78746643",
-            },
-            status=201,
-        )
+                status=status.HTTP_201_CREATED
+            )
 
+        except Exception as e:
+            # Log de l'erreur côté serveur pour debug
+            logger.error(f"Erreur lors de la création du salon : {e}")
 
+            return Response(
+                {"error": "Une erreur est survenue lors de la création du salon."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def demo_login_view(request):
