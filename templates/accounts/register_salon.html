@@ -139,6 +139,79 @@
 </div>
 
 <script>
+const stepUser = document.getElementById("stepUser");
+const stepSalon = document.getElementById("stepSalon");
+const stepIndicator1 = document.getElementById("stepIndicator1");
+const stepIndicator2 = document.getElementById("stepIndicator2");
+const prevStepBtn = document.getElementById("prevStepBtn");
+const nextStepBtn = document.getElementById("nextStepBtn");
+const submitBtn = document.getElementById("submitBtn");
+const formError = document.getElementById("formError");
+
+function setStep(step) {
+    const isStep1 = step === 1;
+    stepUser.classList.toggle("hidden", !isStep1);
+    stepSalon.classList.toggle("hidden", isStep1);
+
+    prevStepBtn.classList.toggle("hidden", isStep1);
+    nextStepBtn.classList.toggle("hidden", !isStep1);
+    submitBtn.classList.toggle("hidden", isStep1);
+
+    stepIndicator1.classList.toggle("active", isStep1);
+    stepIndicator2.classList.toggle("active", !isStep1);
+    stepIndicator1.classList.toggle("done", !isStep1);
+
+    const step1Required = ["username", "email", "password", "password_confirm"];
+    const step2Required = ["salon_nom"];
+
+    step1Required.forEach((id) => {
+        document.getElementById(id).required = isStep1;
+    });
+    step2Required.forEach((id) => {
+        document.getElementById(id).required = !isStep1;
+    });
+}
+
+function showError(message) {
+    formError.textContent = message;
+    formError.style.display = "block";
+}
+
+function clearError() {
+    formError.style.display = "none";
+}
+
+function validateStep1() {
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const passwordConfirm = document.getElementById("password_confirm").value;
+
+    if (!username || !email || !password || !passwordConfirm) {
+        showError("Veuillez remplir tous les champs obligatoires.");
+        return false;
+    }
+    if (password !== passwordConfirm) {
+        showError("Les mots de passe ne correspondent pas.");
+        return false;
+    }
+    return true;
+}
+
+nextStepBtn.addEventListener("click", () => {
+    clearError();
+    if (validateStep1()) {
+        setStep(2);
+    }
+});
+
+prevStepBtn.addEventListener("click", () => {
+    clearError();
+    setStep(1);
+});
+
+setStep(1);
+
 document.getElementById("registerSalonForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -160,6 +233,7 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
     };
 
     try {
+
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {
             method: "POST",
             headers: {
@@ -168,40 +242,42 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
             body: JSON.stringify(payload)
         });
 
-        // Lire la réponse brute
-        const text = await res.text();
-        let data;
-
-        // Tenter de parser JSON
-        try {
-            data = JSON.parse(text);
-        } catch (err) {
-            throw new Error("Réponse serveur invalide : " + text);
-        }
+        const data = await res.json();
 
         if (!res.ok) {
-            // Gérer les erreurs du serializer
             const firstError = Object.values(data)[0];
-            const message = Array.isArray(firstError) ? firstError[0] : "Erreur lors de l'inscription.";
+            const message = Array.isArray(firstError)
+                ? firstError[0]
+                : "Erreur lors de l'inscription.";
             throw new Error(message);
         }
 
-        // Stocker les tokens JWT
+        // Stocker les tokens
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
 
-        // Gestion salon
-        if (data.salon) {
-            localStorage.setItem("salon_can_use_app", data.salon.can_use_app || "true");
-            localStorage.setItem("salon_block_message", data.salon.message || "");
-        }
+        // Statut du salon venant du backend
+        const canUseApp = data.can_use_app;
+
+        localStorage.setItem(
+            "salon_can_use_app",
+            canUseApp ? "true" : "false"
+        );
+
+        // Message envoyé par l'API
+        localStorage.setItem(
+            "salon_block_message",
+            data.message
+        );
 
         // Redirection vers dashboard
         window.location.href = "/dashboard/";
 
     } catch (err) {
+
         formError.textContent = err.message;
         formError.style.display = "block";
+
     }
 });
 </script>
