@@ -19,10 +19,11 @@ from clients.models import Client
 from services.models import Service
 from .permissions import IsAdmin
 
+logger = logging.getLogger(__name__)
+
 # JWT Token
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-
 
 # Login
 @api_view(['POST'])
@@ -38,14 +39,13 @@ def login_view(request):
         token_data = serializer.validated_data
 
         # Récupérer le rôle
-        usersalon = None
         try:
             usersalon = UserSalon.objects.get(user=user)
             role = usersalon.role
         except UserSalon.DoesNotExist:
             role = None
 
-        # Ne pas bloquer la connexion : informer le frontend si le salon est inactif
+        # Vérifier si le salon peut utiliser l'application
         can_use_app = is_salon_active(user)
 
         token_data["user"]["role"] = role
@@ -57,13 +57,12 @@ def login_view(request):
                 "contact": "+223 78746643",
                 "message": (
                     "Votre salon n'est pas encore validé par les administrateurs. "
-                    "Merci de patienter ou d'appeler BarbrePro au +223 78746643."
+                    "Merci de patienter ou d'appeler BarberPro au +223 78746643."
                 ),
             }
         return Response(token_data)
 
     return Response({"error": "Invalid credentials"}, status=400)
-
 
 # Logout
 @api_view(['POST'])
@@ -71,8 +70,7 @@ def login_view(request):
 def logout_view(request):
     return Response({"message": "Logout réussi"})
 
-
-# Profile API pour /api/profile/
+# Profile API
 class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -108,17 +106,13 @@ class ProfileAPIView(APIView):
             "role": UserSalon.objects.filter(user=request.user).first().role if UserSalon.objects.filter(user=request.user).exists() else None
         })
 
-
-# UserViewSet pour /api/users/
+# UserViewSet
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]  # ou IsAdmin si restreindre aux admins
 
-
-
-logger = logging.getLogger(__name__)
-
+# Register Salon API
 class RegisterSalonAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -126,13 +120,13 @@ class RegisterSalonAPIView(APIView):
         serializer = RegisterSalonSerializer(data=request.data)
 
         if not serializer.is_valid():
-            # Renvoie toutes les erreurs du serializer en JSON
             return Response(
                 {"errors": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
+            # Création user + salon + usersalon
             user, salon = serializer.save()
 
             refresh = RefreshToken.for_user(user)
@@ -161,13 +155,13 @@ class RegisterSalonAPIView(APIView):
             )
 
         except Exception as e:
-            # Log de l'erreur côté serveur pour debug
-            logger.error(f"Erreur lors de la création du salon : {e}")
-
+            logger.error(f"Erreur lors de la création du salon : {e}", exc_info=True)
             return Response(
-                {"error": "Une erreur est survenue lors de la création du salon."},
+                {"error": "Une erreur est survenue lors de la création du salon.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+# Demo login view
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def demo_login_view(request):
