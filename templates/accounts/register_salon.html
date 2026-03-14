@@ -88,10 +88,6 @@
 document.getElementById("registerSalonForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const formError = document.getElementById("formError");
-    formError.style.display = "none";
-
-    // Récupération des valeurs
     const payload = {
         username: document.getElementById("username").value.trim(),
         email: document.getElementById("email").value.trim(),
@@ -107,90 +103,55 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
         max_postes: Number(document.getElementById("max_postes").value || 1)
     };
 
-    // Validation front-end
-    if (payload.password !== payload.password_confirm) {
-        formError.textContent = "Les mots de passe ne correspondent pas.";
-        formError.style.display = "block";
-        return;
-    }
-
-    const phoneRegex = /^(\+?223)?\d{8}$/;
-    if (payload.salon_telephone && !phoneRegex.test(payload.salon_telephone)) {
-        formError.textContent = "Numéro de téléphone invalide pour le Mali.";
-        formError.style.display = "block";
-        return;
-    }
-
-    if (payload.salon_localisation && !/^https?:\/\/(www\.)?google\.com\/maps/.test(payload.salon_localisation)) {
-        formError.textContent = "Lien de localisation invalide. Utilisez un lien Google Maps.";
-        formError.style.display = "block";
-        return;
-    }
-
-    // Affichage du loader
-    const submitBtn = e.target.querySelector("button[type='submit']");
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Création en cours...";
+    const formError = document.getElementById("formError");
+    formError.style.display = "none";
 
     try {
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            },
-            credentials: "same-origin",
-            body: JSON.stringify(payload)
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(payload)
         });
 
         const data = await res.json();
-
         if (!res.ok) {
-            let message = "Erreur lors de l'inscription.";
-            for (const key in data) {
-                if (Array.isArray(data[key])) message += `\n${key}: ${data[key].join(', ')}`;
-            }
+            const firstError = Object.values(data)[0];
+            const message = Array.isArray(firstError) ? firstError[0] : "Erreur lors de l'inscription.";
             throw new Error(message);
         }
 
-        // Stockage des tokens
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
-
         const canUseApp = data?.salon?.status === "approved" && data?.salon?.paiement_effectue === true;
         localStorage.setItem("salon_can_use_app", canUseApp ? "true" : "false");
         localStorage.setItem(
             "salon_block_message",
             "Votre salon n'est pas encore validé par les administrateurs. Merci de patienter ou d'appeler BarbrePro au 223 78746643."
         );
-
-        // Redirection conditionnelle
-        window.location.href = canUseApp ? "/dashboard/" : "/salon-en-attente/";
-
+        window.location.href = "/dashboard/";
     } catch (err) {
         formError.textContent = err.message;
         formError.style.display = "block";
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
     }
 
-    // Fonction pour récupérer le CSRF token
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-            const cookies = document.cookie.split(";");
-            for (let cookie of cookies) {
-                cookie = cookie.trim();
-                if (cookie.startsWith(name + "=")) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
 });
 </script>
 {% endblock content %}
