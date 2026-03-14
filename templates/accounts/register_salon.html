@@ -142,7 +142,7 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
     formError.style.display = "none";
 
     try {
-        const res = await fetch("{% url 'accounts:api:register_salon' %}", {
+        const res = await fetch("{% url '/accounts/api/register-salon/' %}", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
