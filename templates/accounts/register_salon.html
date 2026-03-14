@@ -108,13 +108,9 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
 
     try {
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
-        },
-        credentials: "same-origin",
-        body: JSON.stringify(payload)
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         });
 
         const data = await res.json();
@@ -137,21 +133,6 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
         formError.textContent = err.message;
         formError.style.display = "block";
     }
-
-    function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + "=")) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
 });
 </script>
 {% endblock content %}
