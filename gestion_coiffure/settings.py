@@ -23,6 +23,9 @@ ALLOWED_HOSTS = config(
     default="127.0.0.1,localhost,barber-pro-upue.onrender.com,barberpro.onrender.com",
     cast=Csv()
 )
+CSRF_TRUSTED_ORIGINS = [
+    "https://barber-pro-upue.onrender.com"
+]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
