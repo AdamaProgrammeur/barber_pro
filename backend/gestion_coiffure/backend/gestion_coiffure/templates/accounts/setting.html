@@ -1,0 +1,227 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Paramètres du Salon</h2>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-12">
+      <div class="card shadow-sm p-4 rounded-4">
+        <h5 class="fw-semibold text-primary mb-3">Informations du Salon</h5>
+        <p>Complétez les informations de votre salon et ajoutez un logo.</p>
+
+        <!-- Logo -->
+        <div class="text-center mb-3">
+          <img id="logoPreview" src="/static/images/default_logo.png" 
+               class="img-fluid rounded-circle border border-2 border-primary" 
+               style="max-width:150px;" alt="Logo">
+        </div>
+        <input type="file" id="logoInput" class="form-control mb-3" accept="image/*">
+        <button id="saveLogoBtn" class="btn btn-primary mb-4 w-100">Enregistrer le Logo</button>
+
+        <!-- Formulaire -->
+        <form id="profileForm" novalidate>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nom du salon</label>
+              <input type="text" id="name" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer le nom du salon.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email</label>
+              <input type="email" id="email" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer un email valide.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Téléphone</label>
+              <input type="text" id="telephone" class="form-control rounded-pill">
+              <div class="invalid-feedback">Veuillez entrer un numéro valide.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Localisation (optionnelle)</label>
+              <input type="url" id="localisation" class="form-control rounded-pill" placeholder="https://maps.google.com/...">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Adresse (optionnelle)</label>
+              <input type="text" id="adresse" class="form-control rounded-pill">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nombre max de postes</label>
+              <input type="number" id="maxPoste" class="form-control rounded-pill" min="1">
+              <div class="invalid-feedback">Veuillez entrer un nombre valide.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success mt-4 w-100">Enregistrer les informations</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const logoInput = document.getElementById("logoInput");
+  const logoPreview = document.getElementById("logoPreview");
+  const saveLogoBtn = document.getElementById("saveLogoBtn");
+  const profileForm = document.getElementById("profileForm");
+  const toggleThemeBtn = document.getElementById("toggleThemeBtn");
+  const token = localStorage.getItem("access_token");
+
+  // --- Theme toggle ---
+  const applyTheme = (theme) => {
+    if(theme === "dark"){
+      document.body.classList.add("dark-mode");
+      toggleThemeBtn.textContent = "☀️ Mode Clair";
+    } else {
+      document.body.classList.remove("dark-mode");
+      toggleThemeBtn.textContent = "🌙 Mode Sombre";
+    }
+  };
+
+  const savedTheme = localStorage.getItem("theme") || "light";
+  applyTheme(savedTheme);
+
+  toggleThemeBtn.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    toggleThemeBtn.textContent = isDark ? "☀️ Mode Clair" : "🌙 Mode Sombre";
+  });
+
+  // --- Pré-remplir formulaire avec les infos existantes ---
+  const fillProfileForm = async () => {
+    try {
+      const res = await fetch("/api/settings/profile/", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if(!res.ok) throw new Error("Impossible de récupérer les infos du salon.");
+      const data = await res.json();
+
+      if(data.nom) document.getElementById("name").value = data.nom;
+      if(data.email) document.getElementById("email").value = data.email;
+      if(data.telephone) document.getElementById("telephone").value = data.telephone;
+      if(data.localisation) document.getElementById("localisation").value = data.localisation;
+      if(data.adresse) document.getElementById("adresse").value = data.adresse;
+      if(data.max_postes) document.getElementById("maxPoste").value = data.max_postes;
+
+      if(data.logo) logoPreview.src = data.logo;
+
+    } catch(err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
+  fillProfileForm(); // Appel au chargement
+
+  // --- Logo preview ---
+  logoInput.addEventListener("change", () => {
+    const file = logoInput.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e => logoPreview.src = e.target.result;
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // --- Enregistrer logo ---
+  saveLogoBtn.addEventListener("click", async () => {
+    const file = logoInput.files[0];
+    if(!file) return alert("Veuillez choisir un fichier.");
+    const formData = new FormData();
+    formData.append("logo", file);
+
+    try {
+      const res = await fetch("/api/settings/logo/", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: formData
+      });
+      if(!res.ok) throw new Error("Erreur lors de l'enregistrement du logo.");
+      alert("Logo enregistré avec succès !");
+    } catch(err) { alert(err.message); console.error(err); }
+  });
+
+  // --- Enregistrer infos salon ---
+  profileForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    profileForm.classList.add("was-validated");
+
+    const data = {};
+    const fields = ["name","email","telephone","localisation","adresse","maxPoste"];
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if(el && el.value.trim() !== ""){
+        if(f === "maxPoste") {
+          const val = parseInt(el.value);
+          if(!isNaN(val)) data["max_postes"] = val;
+        } else {
+          data[f === "name" ? "nom" : f] = el.value.trim();
+        }
+      }
+    });
+
+    if(Object.keys(data).length === 0){
+      return alert("Veuillez remplir au moins un champ avant d'enregistrer.");
+    }
+
+    try {
+      const res = await fetch("/api/settings/profile/", {
+        method: "PUT",
+        headers: { 
+          "Authorization": "Bearer " + token, 
+          "Content-Type": "application/json" 
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if(!res.ok) throw new Error(result.error || "Erreur lors de l'enregistrement des infos.");
+      alert("Informations enregistrées avec succès !");
+    } catch(err) { alert(err.message); console.error(err); }
+  });
+
+});
+</script>
+
+<!-- Styles mode sombre -->
+<style>
+body.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+body.dark-mode .card {
+  background-color: #1f1f1f;
+  color: #f1f1f1;
+  border-color: #333;
+}
+body.dark-mode .form-control, 
+body.dark-mode textarea, 
+body.dark-mode select {
+  background-color: #1f1f1f;
+  color: #f1f1f1;
+  border-color: #333;
+}
+body.dark-mode .btn {
+  opacity: 0.9;
+}
+body.dark-mode .sidebar {
+  background-color: #212529;
+}
+body.dark-mode .sidebar a {
+  color: #f1f1f1;
+}
+body.dark-mode .sidebar a:hover {
+  background-color: #343a40;
+}
+</style>
+{% endblock %}

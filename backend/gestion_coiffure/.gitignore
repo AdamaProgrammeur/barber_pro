@@ -1,0 +1,96 @@
+# ------------------------------
+# OS / Editors
+# ------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ------------------------------
+# Python
+# ------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ------------------------------
+# Django
+# ------------------------------
+db.sqlite3
+*.sqlite3
+*.log
+logs/
+log/
+
+# Collected static + uploaded media
+staticfiles/
+backend/gestion_coiffure/staticfiles/
+media/
+backend/gestion_coiffure/media/
+
+# Django local settings
+local_settings.py
+
+# ------------------------------
+# Environment / Secrets
+# ------------------------------
+.env
+.env.*
+!.env.example
+backend/gestion_coiffure/.env
+backend/gestion_coiffure/.env.*
+!backend/gestion_coiffure/.env.example
+
+# ------------------------------
+# React / Node
+# ------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/
+.parcel-cache/
+.next/
+.nuxt/
+.svelte-kit/
+coverage/
+frontend/build/
+frontend/.cache/
+
+# ------------------------------
+# PostgreSQL / DB dumps
+# ------------------------------
+*.sql
+*.dump
+*.bak
+*.psql
+postgres_data/
+pgdata/

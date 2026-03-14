@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BarberPro - Plateforme SaaS pour salons</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg: #f5f8ff;
+            --ink: #0f172a;
+            --muted: #475467;
+            --line: #d3e2ff;
+            --primary: #0a4bc8;
+            --primary-strong: #093a98;
+            --accent: #0f766e;
+            --card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(700px 380px at -8% -10%, rgba(10, 75, 200, 0.17), transparent 60%),
+                radial-gradient(780px 420px at 110% 0%, rgba(15, 118, 110, 0.14), transparent 60%),
+                linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+        }
+
+        .navbar-shell {
+            border-bottom: 1px solid rgba(211, 226, 255, 0.7);
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.75);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: "Sora", sans-serif;
+            font-weight: 700;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #0a4bc8, #1e66dc);
+            color: #fff;
+        }
+
+        .hero {
+            padding: 88px 0 60px;
+        }
+
+        .hero-title {
+            font-family: "Sora", sans-serif;
+            font-size: clamp(2rem, 4vw, 3.3rem);
+            line-height: 1.08;
+            margin-bottom: 14px;
+        }
+
+        .hero-lead {
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 640px;
+            margin-bottom: 28px;
+        }
+
+        .btn-main {
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform .2s ease, background .2s ease;
+        }
+
+        .btn-main:hover {
+            background: var(--primary-strong);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .btn-lightline {
+            border: 1px solid #bfd4ff;
+            background: #fff;
+            color: #0a4bc8;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .2s ease;
+        }
+
+        .btn-lightline:hover {
+            border-color: #8eb2fb;
+            background: #eef4ff;
+            color: #093a98;
+        }
+
+        .hero-panel {
+            border: 1px solid var(--line);
+            background: var(--card);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 20px 40px rgba(2, 18, 55, 0.1);
+        }
+
+        .kpi {
+            border: 1px solid #e3ecff;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fbfdff;
+        }
+
+        .kpi .value {
+            font-family: "Sora", sans-serif;
+            font-size: 1.4rem;
+            color: #0a4bc8;
+            margin-bottom: 2px;
+        }
+
+        .section-title {
+            font-family: "Sora", sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .section-sub {
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .feature {
+            height: 100%;
+            border: 1px solid #dce8ff;
+            border-radius: 16px;
+            background: #fff;
+            padding: 18px;
+            box-shadow: 0 10px 22px rgba(2, 18, 55, 0.06);
+        }
+
+        .feature i {
+            font-size: 1.35rem;
+            color: #0a4bc8;
+        }
+
+        .about-box {
+            margin-top: 20px;
+            border: 1px solid #d5e3ff;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            padding: 24px;
+        }
+
+        .social-links a {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 12px;
+            margin-bottom: 8px;
+            color: #0a4bc8;
+            font-weight: 700;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            animation: reveal .7s ease forwards;
+        }
+
+        .delay-1 { animation-delay: .1s; }
+        .delay-2 { animation-delay: .2s; }
+        .delay-3 { animation-delay: .3s; }
+        .delay-4 { animation-delay: .4s; }
+
+        @keyframes reveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            border-top: 1px solid rgba(211, 226, 255, 0.8);
+            color: #667085;
+            font-size: .95rem;
+            margin-top: 54px;
+            padding: 20px 0 28px;
+        }
+    </style>
+</head>
+<body>
+<header class="navbar-shell sticky-top">
+    <div class="container py-2 d-flex align-items-center justify-content-between">
+        <a href="/" class="brand">
+            <span class="brand-mark"><i class="bi bi-scissors"></i></span>
+            <span>BarberPro</span>
+        </a>
+        <div class="d-flex gap-2">
+            {% if demo_login_enabled %}
+            <a href="/accounts/login/?demo=1" class="btn btn-sm btn-warning">Tester la démo</a>
+            {% endif %}
+            <a href="/accounts/login/" class="btn btn-sm btn-outline-primary">Connexion</a>
+            <a href="/accounts/register-salon/" class="btn btn-sm btn-primary">Créer votre salon</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <h1 class="hero-title reveal">Le SaaS pour gérer votre salon comme une entreprise moderne</h1>
+                    <p class="hero-lead reveal delay-1">
+                        BarberPro centralise vos clients, services, file d'attente, paiements et membres d'équipe.
+                        Moins de désordre, plus de performance, meilleure expérience client.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 reveal delay-2">
+                        <a href="/accounts/register-salon/" class="btn-main"><i class="bi bi-rocket-takeoff"></i> Créer votre salon</a>
+                        <a href="/accounts/login/" class="btn-lightline"><i class="bi bi-box-arrow-in-right"></i> Se connecter</a>
+                        {% if demo_login_enabled %}
+                        <a href="/accounts/login/?demo=1" class="btn-lightline"><i class="bi bi-play-circle"></i> Tester la démo</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="hero-panel reveal delay-3">
+                        <h5 class="fw-bold mb-3">Vue produit</h5>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="kpi">
+                                    <div class="value">1</div>
+                                    <small class="text-muted">Compte propriétaire</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="kpi">
+                                    <div class="value">100%</div>
+                                    <small class="text-muted">Workflow digitalisé</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="kpi">
+                                    <div class="value">0</div>
+                                    <small class="text-muted">Dépendance admin Django</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="kpi">
+                                    <div class="value">24/7</div>
+                                    <small class="text-muted">Accès à votre espace</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pb-3">
+        <div class="container">
+            <h2 class="section-title reveal">Fonctionnalités clés</h2>
+            <p class="section-sub reveal delay-1">Un socle SaaS complet pour un salon professionnel.</p>
+            <div class="row g-3">
+                <div class="col-md-4 reveal delay-1">
+                    <article class="feature">
+                        <i class="bi bi-people"></i>
+                        <h5 class="mt-2">Gestion des clients</h5>
+                        <p class="text-muted mb-0">Fiches clients, historique et traitement rapide à l'accueil.</p>
+                    </article>
+                </div>
+                <div class="col-md-4 reveal delay-2">
+                    <article class="feature">
+                        <i class="bi bi-list-task"></i>
+                        <h5 class="mt-2">File d'attente intelligente</h5>
+                        <p class="text-muted mb-0">Ordre de passage clair, suivi des statuts en temps réel.</p>
+                    </article>
+                </div>
+                <div class="col-md-4 reveal delay-3">
+                    <article class="feature">
+                        <i class="bi bi-cash-coin"></i>
+                        <h5 class="mt-2">Services et paiements</h5>
+                        <p class="text-muted mb-0">Catalogue de services, montants cohérents, encaissement simplifié.</p>
+                    </article>
+                </div>
+            </div>
+
+            <div class="about-box reveal delay-4">
+                <h3 class="section-title" style="font-size:1.45rem;">À propos de nous</h3>
+                <p class="mb-2">
+                    Nous sommes <strong>Adama Programmeur</strong>, développeur informatique, formateur web et anglais.
+                    Nous accompagnons les entreprises et professionnels dans leur digitalisation.
+                </p>
+                <p class="mb-2">Contact direct: <a href="tel:+22378746643">78746643</a></p>
+                <div class="social-links">
+                    <a href="https://wa.me/22378746643" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener"><i class="bi bi-facebook"></i> Facebook</a>
+                    <a href="https://www.tiktok.com" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> TikTok</a>
+                    <a href="https://www.instagram.com" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> Instagram</a>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-1">
+        <span>BarberPro - Solution SaaS pour salons de coiffure</span>
+        <span>Conçu par Adama Programmeur</span>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>BarberPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- =========================
+         GLOBAL STYLES + ADMIN PRO
+    ========================== -->
+    <style>
+        :root {
+            --bg-color: #f7faff;
+            --text-color: #0f172a;
+            --card-bg: #ffffff;
+            --navbar-bg: #ffffff;
+            --primary-color: #1d4ed8;
+            --primary-soft: #dbeafe;
+            --border-color: #dbe7ff;
+            --muted-text: #475569;
+        }
+
+        body.dark-mode {
+            --bg-color: #0b1220;
+            --text-color: #e2e8f0;
+            --card-bg: #0f172a;
+            --navbar-bg: #0b1220;
+            --primary-color: #3b82f6;
+            --primary-soft: #1e3a8a;
+            --border-color: #1e3a8a;
+            --muted-text: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Inter", "Segoe UI", sans-serif;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        img,
+        video,
+        canvas,
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ================= SIDEBAR PRO ================= */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f2f88 0%, #1d4ed8 45%, #2563eb 100%);
+            color: #eff6ff;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.25);
+            z-index: 1000;
+        }
+
+        body.dark-mode .sidebar {
+            background: linear-gradient(180deg, #0b1220, #172554);
+        }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .logo-wrapper {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .salon-name {
+            margin-top: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sidebar Menu */
+        .sidebar-menu {
+            flex: 1;
+            padding-top: 15px;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: #dbeafe;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .menu-item i {
+            font-size: 18px;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.14);
+            color: #ffffff;
+            padding-left: 30px;
+        }
+
+        .menu-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            color: #ffffff;
+            border-radius: 8px;
+            margin: 6px 15px;
+        }
+
+        /* Scrollbar */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            background-color: var(--navbar-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+            transition: 0.3s ease;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        /* ================= CONTENT ================= */
+
+        .content {
+            margin-left: 260px;
+            padding: 30px;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(59,130,246,.08), transparent 40%),
+                radial-gradient(circle at 100% 0%, rgba(37,99,235,.05), transparent 32%),
+                var(--bg-color);
+        }
+
+        .table-responsive {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        /* ================= CARDS ================= */
+
+        .card,
+        .dropdown-menu,
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            transition: 0.3s ease;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(30, 64, 175, 0.08);
+        }
+
+        /* ================= BUTTONS ================= */
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            transition: 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+        }
+
+        .table {
+            --bs-table-bg: #ffffff;
+            --bs-table-striped-bg: #f8fbff;
+            --bs-table-hover-bg: #eef4ff;
+            border-color: var(--border-color);
+        }
+
+        .table thead th {
+            background: #eff6ff;
+            color: #1e3a8a;
+            border-color: var(--border-color);
+        }
+
+        .text-muted {
+            color: var(--muted-text) !important;
+        }
+
+        @media (max-width: 991.98px) {
+            .content {
+                margin-left: 0;
+                padding: 74px 14px 20px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .content {
+                padding: 70px 10px 16px;
+            }
+
+            .card {
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    {% include "layout/navbar.html" %}
+
+    <!-- SIDEBAR -->
+    {% include "layout/sidebar.html" %}
+
+    <!-- CONTENT -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- ================= SCRIPTS ================= -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DARK / LIGHT MODE -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const toggleBtn = document.getElementById("toggleThemeBtn");
+
+            function applyTheme(theme) {
+                if (theme === "dark") {
+                    document.body.classList.add("dark-mode");
+                } else {
+                    document.body.classList.remove("dark-mode");
+                }
+            }
+
+            const savedTheme = localStorage.getItem("theme") || "light";
+            applyTheme(savedTheme);
+
+            if (toggleBtn) {
+                toggleBtn.innerHTML = savedTheme === "dark" ? "☀️" : "🌙";
+
+                toggleBtn.addEventListener("click", function () {
+                    const isDark = document.body.classList.toggle("dark-mode");
+                    localStorage.setItem("theme", isDark ? "dark" : "light");
+                    toggleBtn.innerHTML = isDark ? "☀️" : "🌙";
+                });
+            }
+
+        });
+    </script>
+
+</body>
+</html>

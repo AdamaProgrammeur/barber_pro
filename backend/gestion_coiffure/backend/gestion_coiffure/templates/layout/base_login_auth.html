@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}BarberPro{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg: #f4f8ff;
+            --ink: #101828;
+            --muted: #475467;
+            --line: #d8e5ff;
+            --card: #ffffff;
+            --primary: #0a4bc8;
+            --primary-strong: #083999;
+            --accent: #0f766e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Manrope", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(900px 500px at -10% -10%, rgba(10, 75, 200, 0.18), transparent 60%),
+                radial-gradient(900px 450px at 110% 0%, rgba(15, 118, 110, 0.16), transparent 62%),
+                linear-gradient(180deg, #f7faff 0%, var(--bg) 100%);
+        }
+
+        .auth-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+        }
+
+        .auth-layout {
+            width: min(1120px, 100%);
+            background: rgba(255, 255, 255, 0.66);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 28px 60px rgba(2, 18, 55, 0.14);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .brand-pane {
+            background:
+                linear-gradient(160deg, #0a4bc8 0%, #0e5ad7 42%, #1671d9 100%);
+            color: #eaf2ff;
+            padding: 42px 34px;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .brand-pane::before,
+        .brand-pane::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .brand-pane::before {
+            width: 240px;
+            height: 240px;
+            right: -100px;
+            top: -80px;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .brand-pane::after {
+            width: 320px;
+            height: 320px;
+            left: -120px;
+            bottom: -160px;
+            background: rgba(12, 35, 99, 0.35);
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+
+        .brand-title {
+            font-family: "Sora", sans-serif;
+            font-size: 1.8rem;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .brand-copy {
+            color: rgba(234, 242, 255, 0.9);
+            margin-bottom: 24px;
+        }
+
+        .brand-points {
+            display: grid;
+            gap: 12px;
+        }
+
+        .point {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .form-pane {
+            padding: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            width: min(100%, 470px);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--card);
+            box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+            padding: 26px;
+        }
+
+        .auth-title {
+            font-family: "Sora", sans-serif;
+            font-size: 1.35rem;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border-color: #c9dbff;
+            padding: 10px 12px;
+        }
+
+        .form-control:focus {
+            border-color: #6f97eb;
+            box-shadow: 0 0 0 0.2rem rgba(10, 75, 200, 0.16);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 10px 14px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-strong);
+            border-color: var(--primary-strong);
+        }
+
+        .btn-soft {
+            border-radius: 10px;
+            border: 1px solid #d5e3ff;
+            color: #0a4bc8;
+            background: #f4f8ff;
+            font-weight: 600;
+        }
+
+        .btn-soft:hover {
+            background: #e9f0ff;
+            color: #083999;
+        }
+
+        @media (max-width: 991px) {
+            .auth-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-pane {
+                display: none;
+            }
+
+            .form-pane {
+                padding: 18px;
+            }
+
+            .auth-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="auth-shell">
+        <section class="auth-layout">
+            <aside class="brand-pane">
+                <div class="brand-logo"><i class="bi bi-scissors"></i></div>
+                <h1 class="brand-title">BarberPro</h1>
+                <p class="brand-copy">La plateforme SaaS pour piloter votre salon avec un niveau professionnel.</p>
+                <div class="brand-points">
+                    <div class="point"><i class="bi bi-check-circle"></i><span>Gestion clients et file d'attente en temps réel</span></div>
+                    <div class="point"><i class="bi bi-check-circle"></i><span>Configuration des services et paiements centralisés</span></div>
+                    <div class="point"><i class="bi bi-check-circle"></i><span>Accès par rôles pour toute l'équipe du salon</span></div>
+                </div>
+            </aside>
+            <section class="form-pane">
+                <div class="auth-card">
+                    {% block content %}{% endblock %}
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

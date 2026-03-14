@@ -1,0 +1,193 @@
+<!-- Sidebar -->
+<nav class="sidebar d-flex flex-column" id="sidebar" 
+     style="width:250px; min-height:100vh; position:fixed; left:0; top:0; z-index:1040; display:none;">
+
+    <!-- Logo + Nom Salon -->
+    <div class="text-center py-3 border-bottom">
+        <img id="sidebarSalonLogo" src="/static/images/default_logo.png" class="rounded-circle mb-2" alt="Logo Salon" 
+             style="width:60px; height:60px; object-fit:cover; border:1px solid #ccc;">
+        <h6 id="sidebarSalonName" class="fw-bold mb-0" style="margin-bottom:0.2rem;">BarberPro</h6>
+        <p id="sidebarUserName" class="text-muted mb-0" style="font-size:0.9rem;">Utilisateur</p>
+    </div>
+
+    <!-- Menu et Déconnexion -->
+    <div class="d-flex flex-column flex-grow-1 justify-content-between py-2" id="sidebarMenu">
+        <div class="d-flex flex-column flex-grow-1" id="sidebarLinks">
+            <!-- Liens injectés par JS -->
+        </div>
+
+        <div class="p-3">
+            <form method="post" action="{% url 'logout_page' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger w-100">Déconnexion</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Hamburger -->
+<button class="btn btn-light d-md-none" id="toggleSidebar" 
+        style="position:fixed; top:10px; left:10px; z-index:1050; display:none;">
+    <i class="bi bi-list"></i>
+</button>
+<div id="sidebarBackdrop" style="display:none;"></div>
+
+<style>
+/* Liens sidebar modernes */
+.sidebar-link {
+    text-decoration: none;
+    color: #eaf1ff;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 4px 8px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+.sidebar-link i {
+    margin-right: 12px;
+    font-size: 1.2rem;
+    color: #bfdbfe;
+}
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+.sidebar-link:hover i {
+    color: #ffffff;
+}
+
+#sidebarBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.35);
+    z-index: 1035;
+}
+
+@media (max-width: 767.98px) {
+    #sidebar {
+        width: 260px !important;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("access_token");
+    const sidebar = document.getElementById("sidebar");
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const sidebarLogo = document.getElementById("sidebarSalonLogo");
+    const sidebarName = document.getElementById("sidebarSalonName");
+    const userNameEl = document.getElementById("sidebarUserName");
+    const sidebarLinks = document.getElementById("sidebarLinks");
+    const backdrop = document.getElementById("sidebarBackdrop");
+
+    if (!token) return;
+
+    let profile = null;
+
+    // Récupérer profil utilisateur
+    try {
+        const resProfile = await fetch("/accounts/api/profile/", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (resProfile.ok) {
+            profile = await resProfile.json();
+            userNameEl.textContent = `${profile.username} (${profile.role})`;
+        }
+    } catch (err) {
+        console.error("Erreur récupération profil :", err);
+    }
+
+    // Récupérer logo et nom salon
+    try {
+        const resSalon = await fetch("/api/settings/logo/", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (resSalon.ok) {
+            const dataSalon = await resSalon.json();
+            sidebarLogo.src = dataSalon.logo || "/static/images/default_logo.png";
+            sidebarName.textContent = dataSalon.nom || "BarberPro";
+        }
+    } catch (err) {
+        console.error("Erreur récupération salon :", err);
+    }
+
+    const role = (profile?.role || "").toLowerCase();
+    const isAdmin = role === "admin";
+    const isReceptionniste = role === "receptionniste" || role === "coiffeur";
+
+    // Afficher pour admin et réceptionniste
+    if (isAdmin || isReceptionniste) {
+        sidebar.style.display = "flex";
+        toggleBtn.style.display = "block";
+        const isMobile = window.innerWidth < 768;
+        let visible = !isMobile;
+        if (isMobile) {
+            sidebar.style.transform = "translateX(-100%)";
+            backdrop.style.display = "none";
+        } else {
+            sidebar.style.transform = "translateX(0)";
+            backdrop.style.display = "none";
+        }
+
+        const adminLinks = [
+            { text: "Dashboard", href: "/dashboard/", icon: "bi-speedometer2" },
+            { text: "Gestion Utilisateurs", href: "/gestion_users/", icon: "bi-people" },
+            { text: "Services", href: "/crud_service_page/", icon: "bi-gear" },
+            { text: "Clients", href: "/crud_client_page/", icon: "bi-person" },
+            { text: "File", href: "/crud_file_page/", icon: "bi-folder" },
+            { text: "Gestion File", href: "/gestion_file/", icon: "bi-list-check" },
+            { text: "Paiements", href: "/crud_paiement_page/", icon: "bi-currency-dollar" },
+            { text: "Settings", href: "/setting/", icon: "bi-sliders" }
+        ];
+        const receptionLinks = [
+            { text: "Clients", href: "/crud_client_page/", icon: "bi-person" },
+            { text: "File", href: "/crud_file_page/", icon: "bi-folder" },
+            { text: "Gestion File", href: "/gestion_file/", icon: "bi-list-check" },
+            { text: "Paiements", href: "/crud_paiement_page/", icon: "bi-currency-dollar" }
+        ];
+        const links = isAdmin ? adminLinks : receptionLinks;
+
+        links.forEach(link => {
+            const a = document.createElement("a");
+            a.className = "sidebar-link";
+            a.href = link.href;
+            a.innerHTML = `<i class="bi ${link.icon}"></i> ${link.text}`;
+            sidebarLinks.appendChild(a);
+        });
+
+        toggleBtn.addEventListener("click", () => {
+            sidebar.style.transform = visible ? "translateX(-100%)" : "translateX(0)";
+            backdrop.style.display = visible ? "none" : "block";
+            visible = !visible;
+        });
+
+        backdrop.addEventListener("click", () => {
+            sidebar.style.transform = "translateX(-100%)";
+            backdrop.style.display = "none";
+            visible = false;
+        });
+
+        window.addEventListener("resize", () => {
+            const nowMobile = window.innerWidth < 768;
+            if (nowMobile) {
+                sidebar.style.transform = "translateX(-100%)";
+                backdrop.style.display = "none";
+                visible = false;
+            } else {
+                sidebar.style.transform = "translateX(0)";
+                backdrop.style.display = "none";
+                visible = true;
+            }
+        });
+    } else {
+        sidebar.style.display = "none";
+        toggleBtn.style.display = "none";
+        backdrop.style.display = "none";
+    }
+});
+</script>
