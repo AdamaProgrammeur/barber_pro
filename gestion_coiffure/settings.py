@@ -34,17 +34,13 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 # =========================
 # Hosts & CSRF
 # =========================
-ALLOWED_HOSTS = [h.strip() for h in _env.get("ALLOWED_HOSTS", "unideating-sebrina-nonbindingly.ngrok-free.dev").split(",") if h.strip()]
+# ALLOWED_HOSTS (piloté par .env)
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="barberpro-scwn.onrender.com",
+    cast=Csv(),
+)
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://barber-pro-upue.onrender.com",
-    # si tu utilises encore ngrok pour tests locaux
-    "https://unideating-sebrina-nonbindingly.ngrok-free.dev",
-]
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
 
 # =========================
 # Installed apps
