@@ -1,193 +1,395 @@
-<!-- Sidebar -->
-<nav class="sidebar d-flex flex-column" id="sidebar" 
-     style="width:250px; min-height:100vh; position:fixed; left:0; top:0; z-index:1040; display:none;">
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
 
-    <!-- Logo + Nom Salon -->
-    <div class="text-center py-3 border-bottom">
-        <img id="sidebarSalonLogo" src="/static/images/default_logo.png" class="rounded-circle mb-2" alt="Logo Salon" 
-             style="width:60px; height:60px; object-fit:cover; border:1px solid #ccc;">
-        <h6 id="sidebarSalonName" class="fw-bold mb-0" style="margin-bottom:0.2rem;">BarberPro</h6>
-        <p id="sidebarUserName" class="text-muted mb-0" style="font-size:0.9rem;">Utilisateur</p>
-    </div>
-
-    <!-- Menu et Déconnexion -->
-    <div class="d-flex flex-column flex-grow-1 justify-content-between py-2" id="sidebarMenu">
-        <div class="d-flex flex-column flex-grow-1" id="sidebarLinks">
-            <!-- Liens injectés par JS -->
+    <!-- Header salon -->
+    <div class="sb-header">
+        <div class="sb-logo-wrap">
+            <img id="sidebarSalonLogo" src="/static/images/default_logo.png" alt="Logo">
         </div>
-
-        <div class="p-3">
-            <form method="post" action="{% url 'logout_page' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger w-100">Déconnexion</button>
-            </form>
+        <div class="sb-salon-name" id="sidebarSalonName">BarberPro</div>
+        <div class="sb-user-badge">
+            <i class="bi bi-person-circle"></i>
+            <span id="sidebarUserName">Utilisateur</span>
         </div>
     </div>
-</nav>
 
-<!-- Hamburger -->
-<button class="btn btn-light d-md-none" id="toggleSidebar" 
-        style="position:fixed; top:10px; left:10px; z-index:1050; display:none;">
+    <!-- Navigation -->
+    <nav class="sb-nav" id="sidebarLinks"></nav>
+
+    <!-- Footer déconnexion -->
+    <div class="sb-footer">
+        <form method="post" action="{% url 'logout_page' %}">
+            {% csrf_token %}
+            <button type="submit" class="sb-logout-btn">
+                <i class="bi bi-box-arrow-left"></i>
+                <span>Déconnexion</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- Bouton hamburger mobile -->
+<button id="toggleSidebar" class="sb-toggle" style="display:none;">
     <i class="bi bi-list"></i>
 </button>
-<div id="sidebarBackdrop" style="display:none;"></div>
+
+<!-- Backdrop mobile -->
+<div id="sidebarBackdrop"></div>
 
 <style>
-/* Liens sidebar modernes */
-.sidebar-link {
-    text-decoration: none;
-    color: #eaf1ff;
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin: 4px 8px;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-.sidebar-link i {
-    margin-right: 12px;
-    font-size: 1.2rem;
-    color: #bfdbfe;
-}
-.sidebar-link:hover {
-    background-color: rgba(255, 255, 255, 0.16);
-    color: #ffffff;
-}
-.sidebar-link:hover i {
-    color: #ffffff;
+/* ===== VARIABLES ===== */
+:root {
+    --sb-width: 260px;
+    --sb-bg1: #0a1628;
+    --sb-bg2: #0f2044;
+    --sb-accent: #3b82f6;
+    --sb-accent-soft: rgba(59,130,246,0.15);
+    --sb-text: #cbd5e1;
+    --sb-text-muted: #64748b;
+    --sb-border: rgba(255,255,255,0.06);
+    --sb-hover: rgba(255,255,255,0.07);
+    --sb-radius: 10px;
 }
 
+/* ===== SIDEBAR BASE ===== */
+#sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sb-width);
+    height: 100vh;
+    background: linear-gradient(180deg, var(--sb-bg1) 0%, var(--sb-bg2) 100%);
+    display: none;
+    flex-direction: column;
+    z-index: 1040;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.35);
+    border-right: 1px solid var(--sb-border);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.sb-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--sb-border);
+    text-align: center;
+    background: rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+
+.sb-logo-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    background: #fff;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+    border: 2px solid rgba(59,130,246,0.4);
+}
+
+.sb-logo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sb-salon-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sb-user-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sb-accent-soft);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    color: #93c5fd;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.sb-user-badge span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== NAV ===== */
+.sb-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.sb-nav::-webkit-scrollbar { width: 4px; }
+.sb-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+/* Section label */
+.sb-section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--sb-text-muted);
+    padding: 14px 12px 6px;
+}
+
+/* Lien */
+.sb-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--sb-radius);
+    color: var(--sb-text);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.18s ease;
+    margin-bottom: 2px;
+    position: relative;
+}
+
+.sb-link i {
+    font-size: 1.05rem;
+    width: 20px;
+    text-align: center;
+    color: var(--sb-text-muted);
+    transition: color 0.18s;
+    flex-shrink: 0;
+}
+
+.sb-link:hover {
+    background: var(--sb-hover);
+    color: #f1f5f9;
+}
+
+.sb-link:hover i { color: var(--sb-accent); }
+
+.sb-link.active {
+    background: var(--sb-accent-soft);
+    color: #93c5fd;
+    border: 1px solid rgba(59,130,246,0.2);
+}
+
+.sb-link.active i { color: var(--sb-accent); }
+
+.sb-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20%; bottom: 20%;
+    width: 3px;
+    background: var(--sb-accent);
+    border-radius: 0 3px 3px 0;
+}
+
+/* ===== FOOTER ===== */
+.sb-footer {
+    padding: 14px 12px;
+    border-top: 1px solid var(--sb-border);
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.1);
+}
+
+.sb-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: var(--sb-radius);
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #fca5a5;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.sb-logout-btn:hover {
+    background: rgba(239,68,68,0.22);
+    color: #fecaca;
+    border-color: rgba(239,68,68,0.4);
+}
+
+/* ===== HAMBURGER ===== */
+.sb-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1050;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #1d4ed8;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(29,78,216,0.4);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sb-toggle:hover { background: #1e40af; }
+
+/* ===== BACKDROP ===== */
 #sidebarBackdrop {
+    display: none;
     position: fixed;
     inset: 0;
-    background: rgba(2, 6, 23, 0.35);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
     z-index: 1035;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 767.98px) {
     #sidebar {
-        width: 260px !important;
         transform: translateX(-100%);
-        transition: transform .25s ease;
+    }
+    #sidebar.open {
+        transform: translateX(0);
     }
 }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("access_token");
-    const sidebar = document.getElementById("sidebar");
-    const toggleBtn = document.getElementById("toggleSidebar");
-    const sidebarLogo = document.getElementById("sidebarSalonLogo");
-    const sidebarName = document.getElementById("sidebarSalonName");
-    const userNameEl = document.getElementById("sidebarUserName");
+    const token       = localStorage.getItem("access_token");
+    const sidebar     = document.getElementById("sidebar");
+    const toggleBtn   = document.getElementById("toggleSidebar");
+    const backdrop    = document.getElementById("sidebarBackdrop");
     const sidebarLinks = document.getElementById("sidebarLinks");
-    const backdrop = document.getElementById("sidebarBackdrop");
 
     if (!token) return;
 
     let profile = null;
 
-    // Récupérer profil utilisateur
+    // Profil utilisateur
     try {
-        const resProfile = await fetch("/accounts/api/profile/", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (resProfile.ok) {
-            profile = await resProfile.json();
-            userNameEl.textContent = `${profile.username} (${profile.role})`;
+        const r = await fetch("/accounts/api/profile/", { headers: { "Authorization": `Bearer ${token}` } });
+        if (r.ok) {
+            profile = await r.json();
+            const roleLabel = profile.role === "admin" ? "Admin" : "Réceptionniste";
+            document.getElementById("sidebarUserName").textContent = profile.username;
+            document.querySelector(".sb-user-badge span").textContent = `${profile.username} · ${roleLabel}`;
         }
-    } catch (err) {
-        console.error("Erreur récupération profil :", err);
-    }
+    } catch(e) {}
 
-    // Récupérer logo et nom salon
+    // Logo + nom salon
     try {
-        const resSalon = await fetch("/api/settings/logo/", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (resSalon.ok) {
-            const dataSalon = await resSalon.json();
-            sidebarLogo.src = dataSalon.logo || "/static/images/default_logo.png";
-            sidebarName.textContent = dataSalon.nom || "BarberPro";
+        const r = await fetch("/api/settings/logo/", { headers: { "Authorization": `Bearer ${token}` } });
+        if (r.ok) {
+            const d = await r.json();
+            if (d.logo) document.getElementById("sidebarSalonLogo").src = d.logo;
+            if (d.nom)  document.getElementById("sidebarSalonName").textContent = d.nom;
         }
-    } catch (err) {
-        console.error("Erreur récupération salon :", err);
-    }
+    } catch(e) {}
 
     const role = (profile?.role || "").toLowerCase();
     const isAdmin = role === "admin";
-    const isReceptionniste = role === "receptionniste" || role === "coiffeur";
+    const isReception = role === "receptionniste" || role === "coiffeur";
 
-    // Afficher pour admin et réceptionniste
-    if (isAdmin || isReceptionniste) {
-        sidebar.style.display = "flex";
-        toggleBtn.style.display = "block";
-        const isMobile = window.innerWidth < 768;
-        let visible = !isMobile;
-        if (isMobile) {
-            sidebar.style.transform = "translateX(-100%)";
-            backdrop.style.display = "none";
-        } else {
+    if (!isAdmin && !isReception) return;
+
+    sidebar.style.display = "flex";
+    toggleBtn.style.display = "flex";
+
+    const adminLinks = [
+        { section: "PRINCIPAL" },
+        { text: "Dashboard",          href: "/dashboard/",         icon: "bi-speedometer2" },
+        { section: "GESTION" },
+        { text: "Clients",             href: "/crud_client_page/",  icon: "bi-people" },
+        { text: "Services",            href: "/crud_service_page/", icon: "bi-scissors" },
+        { text: "File d'attente",      href: "/crud_file_page/",    icon: "bi-list-ol" },
+        { text: "Gestion File",        href: "/gestion_file/",      icon: "bi-list-check" },
+        { section: "FINANCES" },
+        { text: "Paiements",           href: "/crud_paiement_page/",icon: "bi-credit-card" },
+        { text: "Dépenses",            href: "/depenses/",          icon: "bi-wallet2" },
+        { section: "ADMINISTRATION" },
+        { text: "Utilisateurs",        href: "/gestion_users/",     icon: "bi-person-gear" },
+        { text: "Paramètres",          href: "/setting/",           icon: "bi-sliders" },
+    ];
+
+    const receptionLinks = [
+        { section: "GESTION" },
+        { text: "Clients",        href: "/crud_client_page/",  icon: "bi-people" },
+        { text: "File d'attente", href: "/crud_file_page/",    icon: "bi-list-ol" },
+        { text: "Gestion File",   href: "/gestion_file/",      icon: "bi-list-check" },
+        { text: "Paiements",      href: "/crud_paiement_page/",icon: "bi-credit-card" },
+    ];
+
+    const links = isAdmin ? adminLinks : receptionLinks;
+    const currentPath = window.location.pathname;
+
+    links.forEach(item => {
+        if (item.section) {
+            const label = document.createElement("div");
+            label.className = "sb-section-label";
+            label.textContent = item.section;
+            sidebarLinks.appendChild(label);
+            return;
+        }
+        const a = document.createElement("a");
+        a.className = "sb-link" + (currentPath === item.href ? " active" : "");
+        a.href = item.href;
+        a.innerHTML = `<i class="bi ${item.icon}"></i><span>${item.text}</span>`;
+        sidebarLinks.appendChild(a);
+    });
+
+    // Mobile toggle
+    const isMobile = () => window.innerWidth < 768;
+    let open = !isMobile();
+
+    function openSidebar() {
+        sidebar.classList.add("open");
+        backdrop.style.display = "block";
+        open = true;
+    }
+    function closeSidebar() {
+        sidebar.classList.remove("open");
+        backdrop.style.display = "none";
+        open = false;
+    }
+
+    if (!isMobile()) {
+        sidebar.style.transform = "translateX(0)";
+    }
+
+    toggleBtn.addEventListener("click", () => open ? closeSidebar() : openSidebar());
+    backdrop.addEventListener("click", closeSidebar);
+
+    window.addEventListener("resize", () => {
+        if (!isMobile()) {
             sidebar.style.transform = "translateX(0)";
             backdrop.style.display = "none";
+            open = true;
+        } else if (!open) {
+            sidebar.classList.remove("open");
         }
-
-        const adminLinks = [
-            { text: "Dashboard", href: "/dashboard/", icon: "bi-speedometer2" },
-            { text: "Gestion Utilisateurs", href: "/gestion_users/", icon: "bi-people" },
-            { text: "Services", href: "/crud_service_page/", icon: "bi-gear" },
-            { text: "Clients", href: "/crud_client_page/", icon: "bi-person" },
-            { text: "File", href: "/crud_file_page/", icon: "bi-folder" },
-            { text: "Gestion File", href: "/gestion_file/", icon: "bi-list-check" },
-            { text: "Paiements", href: "/crud_paiement_page/", icon: "bi-currency-dollar" },
-            { text: "Settings", href: "/setting/", icon: "bi-sliders" }
-        ];
-        const receptionLinks = [
-            { text: "Clients", href: "/crud_client_page/", icon: "bi-person" },
-            { text: "File", href: "/crud_file_page/", icon: "bi-folder" },
-            { text: "Gestion File", href: "/gestion_file/", icon: "bi-list-check" },
-            { text: "Paiements", href: "/crud_paiement_page/", icon: "bi-currency-dollar" }
-        ];
-        const links = isAdmin ? adminLinks : receptionLinks;
-
-        links.forEach(link => {
-            const a = document.createElement("a");
-            a.className = "sidebar-link";
-            a.href = link.href;
-            a.innerHTML = `<i class="bi ${link.icon}"></i> ${link.text}`;
-            sidebarLinks.appendChild(a);
-        });
-
-        toggleBtn.addEventListener("click", () => {
-            sidebar.style.transform = visible ? "translateX(-100%)" : "translateX(0)";
-            backdrop.style.display = visible ? "none" : "block";
-            visible = !visible;
-        });
-
-        backdrop.addEventListener("click", () => {
-            sidebar.style.transform = "translateX(-100%)";
-            backdrop.style.display = "none";
-            visible = false;
-        });
-
-        window.addEventListener("resize", () => {
-            const nowMobile = window.innerWidth < 768;
-            if (nowMobile) {
-                sidebar.style.transform = "translateX(-100%)";
-                backdrop.style.display = "none";
-                visible = false;
-            } else {
-                sidebar.style.transform = "translateX(0)";
-                backdrop.style.display = "none";
-                visible = true;
-            }
-        });
-    } else {
-        sidebar.style.display = "none";
-        toggleBtn.style.display = "none";
-        backdrop.style.display = "none";
-    }
+    });
 });
 </script>

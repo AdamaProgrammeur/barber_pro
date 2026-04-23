@@ -16,6 +16,8 @@ from .views import (
     gestion_file,
     setting,
     register_salon_page,
+    en_attente_page,
+    depenses_page,
 )
 
 urlpatterns = [
@@ -42,8 +44,6 @@ urlpatterns = [
     path('crud_paiement_page/', crud_paiement_page, name='crud_paiement_page'),
 
     path('setting/', setting, name='setting'),
-    
-   
-    
-
+    path('en-attente/', en_attente_page, name='en_attente_page'),
+    path('depenses/', depenses_page, name='depenses_page'),
 ]

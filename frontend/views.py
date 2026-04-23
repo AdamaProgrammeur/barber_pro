@@ -64,3 +64,11 @@ def crud_paiement_page(request):
 
 def setting(request):
     return render(request, "accounts/setting.html")
+
+
+def en_attente_page(request):
+    return render(request, "accounts/en_attente.html")
+
+
+def depenses_page(request):
+    return render(request, "depenses/crud_depense.html")

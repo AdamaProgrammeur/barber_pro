@@ -39,11 +39,8 @@ def login_view(request):
         token_data = serializer.validated_data
 
         # Récupérer le rôle
-        try:
-            usersalon = UserSalon.objects.get(user=user)
-            role = usersalon.role
-        except UserSalon.DoesNotExist:
-            role = None
+        usersalon = UserSalon.objects.filter(user=user).first()
+        role = usersalon.role if usersalon else None
 
         # Vérifier si le salon peut utiliser l'application
         can_use_app = is_salon_active(user)

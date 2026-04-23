@@ -1,188 +1,343 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-<h1 class="mb-4">Dashboard</h1>
 
-<!-- Message d'attente / approbation salon -->
-<div id="salonMessage" class="alert alert-info mt-3" style="display:none;"></div>
+<style>
+/* ===== KPI CARDS ===== */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
 
-<div class="row g-3">
-    <!-- Ligne 1 : Clients -->
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-info text-white p-3">
-            <div class="inner">
-                <h3 id="totalClients">0</h3>
-                <p>Clients Total</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-users"></i>
-            </div>
+.kpi-card {
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+}
+
+.kpi-card::after {
+    content: '';
+    position: absolute;
+    right: -18px; top: -18px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+}
+
+.kpi-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.kpi-body { flex: 1; min-width: 0; }
+
+.kpi-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kpi-label {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.78);
+    font-weight: 500;
+    margin-top: 3px;
+    white-space: nowrap;
+}
+
+/* Couleurs */
+.kpi-blue   { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+.kpi-teal   { background: linear-gradient(135deg, #0f766e, #14b8a6); }
+.kpi-violet { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+.kpi-red    { background: linear-gradient(135deg, #b91c1c, #ef4444); }
+.kpi-green  { background: linear-gradient(135deg, #15803d, #22c55e); }
+.kpi-orange { background: linear-gradient(135deg, #c2410c, #f97316); }
+
+/* ===== SECTION TITLE ===== */
+.section-heading {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin: 28px 0 12px;
+}
+
+/* ===== TABLES ===== */
+.dash-card {
+    background: var(--card-bg, #fff);
+    border-radius: 16px;
+    border: 1px solid var(--border-color, #dbe7ff);
+    box-shadow: 0 4px 16px rgba(30,64,175,0.06);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.dash-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, #dbe7ff);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dash-card-header h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-color, #0f172a);
+}
+
+.dash-card .table { margin: 0; }
+.dash-card .table thead th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+}
+.dash-card .table tbody td { padding: 10px 16px; font-size: 0.875rem; vertical-align: middle; }
+.dash-card .table tbody tr:last-child td { border-bottom: none; }
+
+.empty-row td { color: #94a3b8; font-style: italic; }
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h4 class="mb-0 fw-bold">Dashboard</h4>
+    <span class="text-muted" style="font-size:.82rem;" id="dashDate"></span>
+</div>
+
+<div id="salonMessage" class="alert alert-warning" style="display:none;"></div>
+
+<!-- ===== KPI ROW 1 ===== -->
+<div class="section-heading">Activité</div>
+<div class="kpi-grid">
+    <div class="kpi-card kpi-blue">
+        <div class="kpi-icon"><i class="bi bi-people-fill"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="totalClients">—</div>
+            <div class="kpi-label">Clients en File</div>
         </div>
     </div>
-
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-warning text-dark p-3">
-            <div class="inner">
-                <h3 id="totalAttente">0</h3>
-                <p>En Attente</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-hourglass-start"></i>
-            </div>
+    <div class="kpi-card kpi-teal">
+        <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="paiementsToday">—</div>
+            <div class="kpi-label">Paiements Aujourd'hui</div>
         </div>
     </div>
-
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-primary text-white p-3">
-            <div class="inner">
-                <h3 id="totalEncours">0</h3>
-                <p>En Cours</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-scissors"></i>
-            </div>
+    <div class="kpi-card kpi-violet">
+        <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="sommePaiementsTotal">—</div>
+            <div class="kpi-label">Somme Totale</div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mt-3">
-    <!-- Ligne 2 : Terminés + Paiements Aujourd'hui + Somme Paiements Aujourd'hui -->
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-success text-white p-3">
-            <div class="inner">
-                <h3 id="totalTermine">0</h3>
-                <p>Terminés</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-check"></i>
-            </div>
+<!-- ===== KPI ROW 2 ===== -->
+<div class="section-heading">Finances</div>
+<div class="kpi-grid">
+    <div class="kpi-card kpi-red">
+        <div class="kpi-icon"><i class="bi bi-wallet2"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="depensesTotal">—</div>
+            <div class="kpi-label">Total Dépenses</div>
         </div>
     </div>
-
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-secondary text-white p-3">
-            <div class="inner">
-                <h3 id="paiementsToday">0</h3>
-                <p>Paiements Aujourd'hui</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-money-bill-wave"></i>
-            </div>
+    <div class="kpi-card kpi-green">
+        <div class="kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="beneficeToday">—</div>
+            <div class="kpi-label">Bénéfice Net Aujourd'hui</div>
         </div>
     </div>
-
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-secondary text-white p-3">
-            <div class="inner">
-                <h3 id="sommePaiementsToday">0</h3>
-                <p>Somme Paiements Aujourd'hui</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-money-bill-wave"></i>
-            </div>
+    <div class="kpi-card kpi-orange">
+        <div class="kpi-icon"><i class="bi bi-calendar-check"></i></div>
+        <div class="kpi-body">
+            <div class="kpi-value" id="sommePaiementsToday">—</div>
+            <div class="kpi-label">Encaissé Aujourd'hui</div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mt-3">
-    <!-- Ligne 3 : Somme Paiements Totale + Coiffeurs + Réceptionnistes -->
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-secondary text-white p-3">
-            <div class="inner">
-                <h3 id="sommePaiementsTotal">0</h3>
-                <p>Somme Paiements Totale</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-money-bill-wave"></i>
-            </div>
-        </div>
+<!-- ===== HISTORIQUE PAIEMENTS 7 JOURS ===== -->
+<div class="section-heading">Historique</div>
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h5><i class="bi bi-bar-chart-line me-2 text-primary"></i>Paiements — 7 derniers jours</h5>
     </div>
-
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-dark text-white p-3">
-            <div class="inner">
-                <h3 id="totalCoiffeurs">0</h3>
-                <p>Administrateurs</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-user-tie"></i>
-            </div>
-        </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead><tr><th>Date</th><th>Total encaissé</th></tr></thead>
+            <tbody id="histoPaiementsBody"></tbody>
+        </table>
     </div>
+</div>
 
-    <div class="col-lg-4 col-12">
-        <div class="small-box bg-danger text-white p-3">
-            <div class="inner">
-                <h3 id="totalReceptions">0</h3>
-                <p>Réceptionnistes</p>
-            </div>
-            <div class="icon">
-                <i class="fa-solid fa-user-clock"></i>
-            </div>
-        </div>
+<!-- ===== DERNIÈRES DÉPENSES ===== -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h5><i class="bi bi-wallet2 me-2 text-danger"></i>Dernières dépenses</h5>
+        <a href="/depenses/" class="btn btn-sm btn-outline-danger" style="font-size:.78rem;">Voir tout</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead><tr><th>Libellé</th><th>Catégorie</th><th>Montant</th><th>Date</th></tr></thead>
+            <tbody id="dernieresDepensesBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== HISTORIQUE FILE ===== -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h5><i class="bi bi-list-check me-2 text-success"></i>Historique des files</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Client</th><th>Service</th><th>Prix</th>
+                    <th>Payé</th><th>Reste</th><th>Statut</th><th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="histoFileBody"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("access_token");
+    if (!token) { window.location.href = "/accounts/login/"; return; }
 
-    if (!token) {
-        alert("Tu n'es pas connecté. Connecte-toi pour accéder au dashboard.");
-        return;
+    // Date du jour
+    document.getElementById("dashDate").textContent = new Date().toLocaleDateString('fr-FR', {
+        weekday:'long', day:'numeric', month:'long', year:'numeric'
+    });
+
+    const STATUT_LABELS = { EN_ATTENTE:"En attente", EN_COURS:"En cours", TERMINE:"Terminé" };
+    const STATUT_COLORS = { EN_ATTENTE:"warning text-dark", EN_COURS:"primary", TERMINE:"success" };
+    const CATS = { LOYER:"Loyer", SALAIRE:"Salaire", MATERIEL:"Matériel",
+                   EAU_ELECTRICITE:"Eau/Élec", PRODUIT:"Produit", AUTRE:"Autre" };
+
+    function setText(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
     }
 
-    // 1️⃣ Charger les stats du dashboard
-    fetch("/api/dashboard/", {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-        }
-    })
-    .then(async response => {
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.error || `Impossible de charger le dashboard (HTTP ${response.status}).`);
+    function emptyRow(cols, msg) {
+        return `<tr class="empty-row"><td colspan="${cols}" class="text-center py-3">${msg}</td></tr>`;
+    }
+
+    fetch("/api/dashboard/", { headers: { "Authorization": "Bearer " + token } })
+    .then(async res => {
+        if (res.status === 401) { window.location.href = "/accounts/login/"; return null; }
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(payload.error || "Erreur dashboard HTTP " + res.status);
         return payload;
     })
     .then(data => {
-        document.getElementById("totalClients").textContent = data.clients.total;
-        document.getElementById("totalAttente").textContent = data.clients.en_attente;
-        document.getElementById("totalEncours").textContent = data.clients.en_cours;
-        document.getElementById("totalTermine").textContent = data.clients.termine;
+        if (!data) return;
 
-        document.getElementById("paiementsToday").textContent = data.paiements.count_today;
-        document.getElementById("sommePaiementsToday").textContent = data.paiements.total_amount_today + " FCFA";
-        document.getElementById("sommePaiementsTotal").textContent = data.paiements.total_amount_all + " FCFA";
+        // KPI
+        setText("totalClients",        data.clients.total);
+        setText("paiementsToday",       data.paiements.count_today);
+        setText("sommePaiementsTotal",  parseFloat(data.paiements.total_amount_all).toLocaleString() + " FCFA");
+        setText("sommePaiementsToday",  parseFloat(data.paiements.total_amount_today).toLocaleString() + " FCFA");
+        setText("depensesTotal",        parseFloat(data.depenses.total_all).toLocaleString() + " FCFA");
+        const benefice = parseFloat(data.paiements.total_amount_today) - parseFloat(data.depenses.total_today);
+        setText("beneficeToday", benefice.toLocaleString() + " FCFA");
 
-        document.getElementById("totalCoiffeurs").textContent = data.users.administrateurs;
-        document.getElementById("totalReceptions").textContent = data.users.receptionnistes;
+        // Historique paiements 7 jours
+        const histoBody = document.getElementById("histoPaiementsBody");
+        histoBody.innerHTML = "";
+        (data.historique_paiements || []).forEach(h => {
+            const isEmpty = h.total === 0;
+            histoBody.innerHTML += `<tr>
+                <td class="fw-500">${h.date}</td>
+                <td>
+                    <span class="fw-bold ${isEmpty ? 'text-muted' : 'text-success'}">
+                        ${h.total.toLocaleString()} FCFA
+                    </span>
+                </td>
+            </tr>`;
+        });
+
+        // Dernières dépenses
+        const depBody = document.getElementById("dernieresDepensesBody");
+        depBody.innerHTML = "";
+        if (!(data.dernieres_depenses || []).length) {
+            depBody.innerHTML = emptyRow(4, "Aucune dépense enregistrée");
+        } else {
+            data.dernieres_depenses.forEach(d => {
+                depBody.innerHTML += `<tr>
+                    <td>${d.libelle}</td>
+                    <td><span class="badge rounded-pill bg-secondary bg-opacity-75">${CATS[d.categorie]||d.categorie}</span></td>
+                    <td><span class="fw-bold text-danger">${parseFloat(d.montant).toLocaleString()} FCFA</span></td>
+                    <td class="text-muted">${d.date}</td>
+                </tr>`;
+            });
+        }
+
+        // Historique file
+        const fileBody = document.getElementById("histoFileBody");
+        fileBody.innerHTML = "";
+        if (!(data.historique_file || []).length) {
+            fileBody.innerHTML = emptyRow(7, "Aucune entrée dans la file");
+        } else {
+            data.historique_file.forEach(f => {
+                const color = STATUT_COLORS[f.statut] || "secondary";
+                const label = STATUT_LABELS[f.statut] || f.statut;
+                fileBody.innerHTML += `<tr>
+                    <td class="fw-500">${f.client}</td>
+                    <td>${f.service}</td>
+                    <td>${f.prix.toLocaleString()} FCFA</td>
+                    <td class="text-success fw-bold">${f.montant_paye.toLocaleString()} FCFA</td>
+                    <td class="${f.reste > 0 ? 'text-danger' : 'text-success'} fw-bold">${f.reste.toLocaleString()} FCFA</td>
+                    <td><span class="badge rounded-pill bg-${color}">${label}</span></td>
+                    <td class="text-muted">${f.date}</td>
+                </tr>`;
+            });
+        }
     })
-    .catch(error => {
-        console.error("Erreur dashboard :", error);
-        alert(error.message || "Erreur dashboard.");
+    .catch(err => {
+        const msg = document.getElementById("salonMessage");
+        msg.textContent = err.message || "Erreur chargement dashboard.";
+        msg.style.display = "block";
     });
 
-    // 2️⃣ Vérifier le statut du salon
-    fetch("/api/salon/status/", {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-        }
-    })
-    .then(res => res.json())
-    .then(statusData => {
-        const salonMessage = document.getElementById("salonMessage");
-        if (!statusData.can_use_app) {
-            salonMessage.textContent = statusData.message;
-            salonMessage.style.display = "block";
-        } else {
-            salonMessage.style.display = "none";
-        }
-    })
-    .catch(err => console.error("Erreur statut salon :", err));
+    fetch("/api/settings/status/", { headers: { "Authorization": "Bearer " + token } })
+    .then(res => res.ok ? res.json() : null)
+    .then(s => {
+        if (!s || s.can_use_app) return;
+        const msg = document.getElementById("salonMessage");
+        msg.textContent = s.message;
+        msg.style.display = "block";
+    }).catch(() => {});
 });
 </script>
-
 {% endblock %}

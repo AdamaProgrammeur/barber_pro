@@ -1,0 +1,286 @@
+{% extends "layout/base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="bi bi-wallet2 me-2"></i>Gestion des Dépenses</h3>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDepenseModal">
+        <i class="bi bi-plus-lg"></i> Nouvelle dépense
+    </button>
+</div>
+
+<div id="alert-container"></div>
+
+<!-- Résumé -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm">
+            <div class="text-muted" style="font-size:.82rem;">Dépenses aujourd'hui</div>
+            <div class="fw-bold fs-4 text-danger" id="resumeToday">—</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm">
+            <div class="text-muted" style="font-size:.82rem;">Total toutes dépenses</div>
+            <div class="fw-bold fs-4 text-danger" id="resumeTotal">—</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 border-0 shadow-sm">
+            <div class="text-muted" style="font-size:.82rem;">Nombre aujourd'hui</div>
+            <div class="fw-bold fs-4" id="resumeCount">—</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+    </div>
+    <div class="col-md-3">
+        <select id="filterCategorie" class="form-select">
+            <option value="">Toutes catégories</option>
+            <option value="LOYER">Loyer</option>
+            <option value="SALAIRE">Salaire</option>
+            <option value="MATERIEL">Matériel</option>
+            <option value="EAU_ELECTRICITE">Eau / Électricité</option>
+            <option value="PRODUIT">Produit coiffure</option>
+            <option value="AUTRE">Autre</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="date" id="filterDate" class="form-control">
+    </div>
+</div>
+
+<!-- Tableau -->
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th>Libellé</th>
+                <th>Catégorie</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Note</th>
+                <th width="100">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="depensesTableBody"></tbody>
+    </table>
+</div>
+
+<!-- Modal Ajouter -->
+<div class="modal fade" id="addDepenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addDepenseForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouvelle dépense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Libellé <span class="text-danger">*</span></label>
+                    <input type="text" id="addLibelle" class="form-control mb-3" required>
+                    <label class="form-label">Montant (FCFA) <span class="text-danger">*</span></label>
+                    <input type="number" id="addMontant" class="form-control mb-3" min="1" required>
+                    <label class="form-label">Catégorie</label>
+                    <select id="addCategorie" class="form-select mb-3">
+                        <option value="LOYER">Loyer</option>
+                        <option value="SALAIRE">Salaire</option>
+                        <option value="MATERIEL">Matériel</option>
+                        <option value="EAU_ELECTRICITE">Eau / Électricité</option>
+                        <option value="PRODUIT">Produit coiffure</option>
+                        <option value="AUTRE" selected>Autre</option>
+                    </select>
+                    <label class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" id="addDate" class="form-control mb-3" required>
+                    <label class="form-label">Note</label>
+                    <textarea id="addNote" class="form-control mb-2" rows="2"></textarea>
+                    <div id="addError" class="text-danger" style="font-size:.85rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-100">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Modifier -->
+<div class="modal fade" id="editDepenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editDepenseForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier dépense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
+                    <label class="form-label">Libellé</label>
+                    <input type="text" id="editLibelle" class="form-control mb-3" required>
+                    <label class="form-label">Montant (FCFA)</label>
+                    <input type="number" id="editMontant" class="form-control mb-3" min="1" required>
+                    <label class="form-label">Catégorie</label>
+                    <select id="editCategorie" class="form-select mb-3">
+                        <option value="LOYER">Loyer</option>
+                        <option value="SALAIRE">Salaire</option>
+                        <option value="MATERIEL">Matériel</option>
+                        <option value="EAU_ELECTRICITE">Eau / Électricité</option>
+                        <option value="PRODUIT">Produit coiffure</option>
+                        <option value="AUTRE">Autre</option>
+                    </select>
+                    <label class="form-label">Date</label>
+                    <input type="date" id="editDate" class="form-control mb-3" required>
+                    <label class="form-label">Note</label>
+                    <textarea id="editNote" class="form-control mb-2" rows="2"></textarea>
+                    <div id="editError" class="text-danger" style="font-size:.85rem;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning w-100">Modifier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("access_token");
+    if (!token) { window.location.href = "/accounts/login/"; return; }
+
+    let allDepenses = [];
+    const tbody = document.getElementById("depensesTableBody");
+    const CATS = { LOYER:"Loyer", SALAIRE:"Salaire", MATERIEL:"Matériel",
+                   EAU_ELECTRICITE:"Eau / Électricité", PRODUIT:"Produit coiffure", AUTRE:"Autre" };
+
+    function showAlert(msg, type="success") {
+        document.getElementById("alert-container").innerHTML =
+            `<div class="alert alert-${type} alert-dismissible fade show">
+                ${msg}<button class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    }
+
+    async function loadDepenses() {
+        const res = await fetch("/api/depenses/", { headers: { "Authorization": "Bearer " + token } });
+        allDepenses = await res.json();
+        renderTable(allDepenses);
+        updateResume(allDepenses);
+    }
+
+    function updateResume(data) {
+        const today = new Date().toISOString().slice(0, 10);
+        const todayItems = data.filter(d => d.date === today);
+        document.getElementById("resumeToday").textContent = todayItems.reduce((s,d)=>s+parseFloat(d.montant),0).toLocaleString() + " FCFA";
+        document.getElementById("resumeTotal").textContent = data.reduce((s,d)=>s+parseFloat(d.montant),0).toLocaleString() + " FCFA";
+        document.getElementById("resumeCount").textContent = todayItems.length;
+    }
+
+    function renderTable(data) {
+        tbody.innerHTML = "";
+        if (!data.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Aucune dépense enregistrée</td></tr>`;
+            return;
+        }
+        data.forEach(d => {
+            tbody.innerHTML += `<tr>
+                <td>${d.libelle}</td>
+                <td><span class="badge bg-secondary">${CATS[d.categorie]||d.categorie}</span></td>
+                <td class="text-danger fw-bold">${parseFloat(d.montant).toLocaleString()} FCFA</td>
+                <td>${d.date}</td>
+                <td>${d.note||"—"}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-btn" data-id="${d.id}"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-danger del-btn" data-id="${d.id}"><i class="bi bi-trash"></i></button>
+                </td></tr>`;
+        });
+        document.querySelectorAll(".edit-btn").forEach(b => b.onclick = () => openEdit(b.dataset.id));
+        document.querySelectorAll(".del-btn").forEach(b => b.onclick = () => deleteDepense(b.dataset.id));
+    }
+
+    // Ajouter
+    const addModal = new bootstrap.Modal(document.getElementById("addDepenseModal"));
+    document.getElementById("addDepenseModal").addEventListener("show.bs.modal", () => {
+        document.getElementById("addDate").value = new Date().toISOString().slice(0, 10);
+        document.getElementById("addError").textContent = "";
+    });
+    document.getElementById("addDepenseForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const payload = {
+            libelle: document.getElementById("addLibelle").value.trim(),
+            montant: document.getElementById("addMontant").value,
+            categorie: document.getElementById("addCategorie").value,
+            date: document.getElementById("addDate").value,
+            note: document.getElementById("addNote").value.trim(),
+        };
+        if (!payload.libelle) { document.getElementById("addError").textContent = "Le libellé est requis."; return; }
+        const res = await fetch("/api/depenses/", {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) { document.getElementById("addError").textContent = "Erreur enregistrement."; return; }
+        addModal.hide(); this.reset();
+        showAlert("Dépense enregistrée !"); loadDepenses();
+    });
+
+    // Modifier
+    function openEdit(id) {
+        const d = allDepenses.find(x => x.id == id);
+        if (!d) return;
+        document.getElementById("editId").value = d.id;
+        document.getElementById("editLibelle").value = d.libelle;
+        document.getElementById("editMontant").value = d.montant;
+        document.getElementById("editCategorie").value = d.categorie;
+        document.getElementById("editDate").value = d.date;
+        document.getElementById("editNote").value = d.note || "";
+        document.getElementById("editError").textContent = "";
+        new bootstrap.Modal(document.getElementById("editDepenseModal")).show();
+    }
+    document.getElementById("editDepenseForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const id = document.getElementById("editId").value;
+        const payload = {
+            libelle: document.getElementById("editLibelle").value.trim(),
+            montant: document.getElementById("editMontant").value,
+            categorie: document.getElementById("editCategorie").value,
+            date: document.getElementById("editDate").value,
+            note: document.getElementById("editNote").value.trim(),
+        };
+        const res = await fetch(`/api/depenses/${id}/`, {
+            method: "PUT",
+            headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) { document.getElementById("editError").textContent = "Erreur modification."; return; }
+        bootstrap.Modal.getInstance(document.getElementById("editDepenseModal")).hide();
+        showAlert("Dépense modifiée !"); loadDepenses();
+    });
+
+    // Supprimer
+    async function deleteDepense(id) {
+        if (!confirm("Supprimer cette dépense ?")) return;
+        const res = await fetch(`/api/depenses/${id}/`, { method: "DELETE", headers: { "Authorization": "Bearer " + token } });
+        if (res.ok) { showAlert("Dépense supprimée."); loadDepenses(); }
+        else showAlert("Erreur suppression.", "danger");
+    }
+
+    // Filtres
+    function applyFilters() {
+        const s = document.getElementById("searchInput").value.toLowerCase();
+        const c = document.getElementById("filterCategorie").value;
+        const d = document.getElementById("filterDate").value;
+        renderTable(allDepenses.filter(x =>
+            (!s || x.libelle.toLowerCase().includes(s) || (x.note||"").toLowerCase().includes(s)) &&
+            (!c || x.categorie === c) &&
+            (!d || x.date === d)
+        ));
+    }
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("filterCategorie").addEventListener("change", applyFilters);
+    document.getElementById("filterDate").addEventListener("change", applyFilters);
+
+    loadDepenses();
+});
+</script>
+{% endblock %}

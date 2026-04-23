@@ -6,6 +6,7 @@ payload = {
     "username": "client_test1",
     "email": "client_test1@example.com",
     "password": "Password123",
+    "password_confirm": "Password123",  # <- ajouté
     "first_name": "Client",
     "last_name": "Test",
 

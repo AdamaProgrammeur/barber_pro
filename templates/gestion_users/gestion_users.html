@@ -20,20 +20,65 @@
     <table class="table table-hover table-bordered mb-0">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
                 <th>Username</th>
                 <th>Prénom</th>
                 <th>Nom</th>
                 <th>Email</th>
                 <th>Rôle</th>
-                <th width="180">Actions</th>
+                <th width="140">Actions</th>
             </tr>
         </thead>
         <tbody id="users-table"></tbody>
     </table>
 </div>
 
-<!-- Modal -->
+<!-- Modal Changer mot de passe -->
+<div class="modal fade" id="pwdModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fa fa-key me-2"></i>Changer le mot de passe
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3" style="font-size:0.88rem;">
+                    Utilisateur : <strong id="pwd-username-label"></strong>
+                </p>
+                <form id="pwd-form">
+                    <input type="hidden" id="pwd-user-id">
+
+                    <label class="form-label">Nouveau mot de passe</label>
+                    <div class="input-group mb-3">
+                        <input type="password" id="new-password" class="form-control"
+                               placeholder="Min. 6 caractères" required>
+                        <button type="button" class="btn btn-outline-secondary" id="toggleNewPwd">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <label class="form-label">Confirmer le mot de passe</label>
+                    <div class="input-group mb-2">
+                        <input type="password" id="confirm-password" class="form-control"
+                               placeholder="Répéter" required>
+                        <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPwd">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <div id="pwd-error" class="text-danger mb-2" style="font-size:0.85rem;"></div>
+
+                    <button type="submit" class="btn btn-info text-white w-100">
+                        Enregistrer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Modifier utilisateur -->
 <div class="modal fade" id="userModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content shadow">
@@ -57,9 +102,16 @@
                     <label class="form-label">Email</label>
                     <input type="email" id="email" class="form-control mb-3" required>
 
-                    <label class="form-label">Mot de passe</label>
-                    <input type="password" id="password" class="form-control mb-3"
-                           placeholder="Laisser vide si inchangé">
+                    <!-- Mot de passe uniquement à la création -->
+                    <div id="password-section">
+                        <label class="form-label">Mot de passe</label>
+                        <div class="input-group mb-3">
+                            <input type="password" id="password" class="form-control" placeholder="Min. 6 caractères">
+                            <button type="button" class="btn btn-outline-secondary" id="toggleFormPwd">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     <label class="form-label">Rôle</label>
                     <select id="role" class="form-select mb-3" required>
@@ -67,9 +119,7 @@
                         <option value="receptionniste">Réceptionniste</option>
                     </select>
 
-                    <button type="submit" class="btn btn-success w-100">
-                        Enregistrer
-                    </button>
+                    <button type="submit" class="btn btn-success w-100">Enregistrer</button>
                 </form>
             </div>
         </div>
@@ -117,17 +167,19 @@ document.addEventListener("DOMContentLoaded", function () {
         users.forEach(u => {
             table.innerHTML += `
                 <tr>
-                    <td>${u.id}</td>
                     <td>${u.username}</td>
                     <td>${u.first_name}</td>
                     <td>${u.last_name}</td>
                     <td>${u.email}</td>
                     <td><span class="badge bg-info">${u.role}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-warning edit-btn" data-id="${u.id}">
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${u.id}" title="Modifier">
                             <i class="fa fa-edit"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger delete-btn" data-id="${u.id}">
+                        <button class="btn btn-sm btn-info pwd-btn" data-id="${u.id}" data-username="${u.username}" title="Changer mot de passe">
+                            <i class="fa fa-key"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${u.id}" title="Supprimer">
                             <i class="fa fa-trash"></i>
                         </button>
                     </td>
@@ -144,12 +196,64 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.onclick = () => deleteUser(btn.dataset.id);
         });
+        document.querySelectorAll(".pwd-btn").forEach(btn => {
+            btn.onclick = () => openPwdModal(btn.dataset.id, btn.dataset.username);
+        });
     }
+
+    function openPwdModal(id, username) {
+        document.getElementById("pwd-user-id").value = id;
+        document.getElementById("pwd-username-label").textContent = username;
+        document.getElementById("pwd-form").reset();
+        document.getElementById("pwd-error").textContent = "";
+        new bootstrap.Modal(document.getElementById("pwdModal")).show();
+    }
+
+    document.getElementById("pwd-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const id = document.getElementById("pwd-user-id").value;
+        const newPwd = document.getElementById("new-password").value;
+        const confirmPwd = document.getElementById("confirm-password").value;
+        const errEl = document.getElementById("pwd-error");
+
+        if (newPwd.length < 6) {
+            errEl.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+            return;
+        }
+        if (newPwd !== confirmPwd) {
+            errEl.textContent = "Les mots de passe ne correspondent pas.";
+            return;
+        }
+        errEl.textContent = "";
+
+        const submitBtn = this.querySelector("button[type=submit]");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Enregistrement...";
+
+        try {
+            const res = await fetch(`/api/usersalon/${id}/`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ password: newPwd })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(JSON.stringify(data));
+            bootstrap.Modal.getInstance(document.getElementById("pwdModal")).hide();
+            showAlert("Mot de passe modifié avec succès.", "success");
+        } catch (err) {
+            errEl.textContent = "Erreur : " + err.message;
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Enregistrer";
+        }
+    });
 
     function editUser(id) {
         const user = allUsers.find(u => u.id == id);
         if (!user) return;
-
         document.getElementById("modalTitle").innerText = "Modifier utilisateur";
         document.getElementById("user-id").value = user.id;
         document.getElementById("username").value = user.username;
@@ -157,6 +261,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("last_name").value = user.last_name;
         document.getElementById("email").value = user.email;
         document.getElementById("role").value = user.role.toLowerCase();
+        // Cacher le champ mot de passe en mode modification
+        document.getElementById("password-section").style.display = "none";
+        document.getElementById("password").required = false;
         document.getElementById("password").value = "";
         modal.show();
     }
@@ -190,6 +297,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("modalTitle").innerText = "Nouvel utilisateur";
         document.getElementById("user-form").reset();
         document.getElementById("user-id").value = "";
+        document.getElementById("password-section").style.display = "block";
+        document.getElementById("password").required = true;
         modal.show();
     };
 
@@ -198,7 +307,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const id = document.getElementById("user-id").value;
         const usernameVal = document.getElementById("username").value.trim();
         const emailVal = document.getElementById("email").value.trim();
-        const passwordVal = document.getElementById("password").value;
         const roleVal = document.getElementById("role").value.toLowerCase();
 
         const payload = {
@@ -211,8 +319,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!usernameVal) return showAlert("Le nom d'utilisateur est requis.", "danger");
         if (!emailVal) return showAlert("L'email est requis.", "danger");
-        if (!id && !passwordVal) return showAlert("Le mot de passe est obligatoire pour créer un utilisateur", "danger");
-        if (passwordVal) payload.password = passwordVal;
+
+        const passwordVal = document.getElementById("password").value;
+        if (!id && !passwordVal) return showAlert("Le mot de passe est obligatoire pour créer un utilisateur.", "danger");
+        if (!id && passwordVal.length < 6) return showAlert("Le mot de passe doit contenir au moins 6 caractères.", "danger");
+        if (!id) payload.password = passwordVal;
 
         const url = id ? `/api/usersalon/${id}/` : "/api/usersalon/";
         const method = id ? "PUT" : "POST";
@@ -252,6 +363,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     loadUsers();
+
+    // Toggle password dans le modal création
+    document.getElementById("toggleFormPwd").addEventListener("click", function() {
+        const input = document.getElementById("password");
+        const isText = input.type === "text";
+        input.type = isText ? "password" : "text";
+        this.querySelector("i").className = isText ? "fa fa-eye" : "fa fa-eye-slash";
+    });
+
+    // Toggle affichage mot de passe dans modal changement
+    [["toggleNewPwd", "new-password"], ["toggleConfirmPwd", "confirm-password"]].forEach(([btnId, inputId]) => {
+        document.getElementById(btnId).addEventListener("click", function() {
+            const input = document.getElementById(inputId);
+            const isText = input.type === "text";
+            input.type = isText ? "password" : "text";
+            this.querySelector("i").className = isText ? "fa fa-eye" : "fa fa-eye-slash";
+        });
+    });
 });
 </script>
 

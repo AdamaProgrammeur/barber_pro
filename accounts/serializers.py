@@ -113,4 +113,4 @@ class RegisterSalonSerializer(serializers.Serializer):
         )
 
         UserSalon.objects.create(user=user, salon=salon, role="admin")
-        return user
+        return user, salon

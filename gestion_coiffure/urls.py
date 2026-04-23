@@ -31,6 +31,7 @@ urlpatterns = [
     path('', include('salon.urls')),   # 🔹 inclure les URLs du salon
     
     path('api/', include('dashbord.urls')),
+    path('api/', include('depenses.urls')),
     path('accounts/', include('user_profile.urls')),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

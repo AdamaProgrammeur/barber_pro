@@ -44,7 +44,7 @@ class SalonProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user_salon = UserSalon.objects.filter(user=self.request.user).first()
-        if not user_salon:
+        if not user_salon: 
             raise Http404("Salon introuvable")
         return user_salon.salon
 

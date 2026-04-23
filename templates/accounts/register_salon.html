@@ -1,86 +1,167 @@
 {% extends "layout/base_login_auth.html" %}
 
-{% block title %}Créer Votre Salon - Salon de Coiffure Pro{% endblock %}
+{% block title %}Créer Votre Salon - BarberPro{% endblock %}
 
 {% block content %}
+<style>
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+    .step-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 2px solid #c9dbff;
+        color: #6b7280;
+        background: #f4f8ff;
+        transition: all 0.3s;
+    }
+    .step-dot.active {
+        background: #0a4bc8;
+        border-color: #0a4bc8;
+        color: #fff;
+    }
+    .step-dot.done {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #fff;
+    }
+    .step-line {
+        flex: 1;
+        height: 2px;
+        background: #c9dbff;
+        border-radius: 2px;
+    }
+    .step-line.done { background: #16a34a; }
+    .form-alert {
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.88rem;
+        display: none;
+    }
+    .form-alert.error { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; }
+    .form-alert.success { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; }
+    .btn-submit-loading { position: relative; }
+    .btn-submit-loading .spinner {
+        display: none;
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        margin-right: 8px;
+    }
+    .btn-submit-loading.loading .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .password-toggle { position: relative; }
+    .password-toggle .toggle-eye {
+        position: absolute; right: 10px; top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer; color: #6b7280; font-size: 1rem;
+    }
+</style>
+
 <div>
     <h2 class="auth-title">Créer votre salon</h2>
-    <p class="auth-subtitle">Ouvrez votre compte propriétaire et configurez votre salon en quelques minutes.</p>
+    <p class="auth-subtitle">Ouvrez votre compte propriétaire en quelques minutes.</p>
 
-    <form id="registerSalonForm" class="d-grid gap-2">
+    <!-- Indicateur d'étapes -->
+    <div class="step-indicator">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-dot" id="dot2">2</div>
+    </div>
 
-        <!-- PARTIE 1 : Infos utilisateur -->
+    <div id="formAlert" class="form-alert"></div>
+
+    <form id="registerSalonForm" class="d-grid gap-2" novalidate>
+
+        <!-- ÉTAPE 1 : Infos utilisateur -->
         <div id="userInfoSection">
             <div class="row g-2">
-                <div class="col-md-6">
+                <div class="col-6">
                     <label class="form-label mb-1">Prénom</label>
-                    <input type="text" class="form-control" id="first_name" placeholder="Prénom" required>
+                    <input type="text" class="form-control" id="first_name" placeholder="Prénom" required autocomplete="given-name">
                 </div>
-                <div class="col-md-6">
+                <div class="col-6">
                     <label class="form-label mb-1">Nom</label>
-                    <input type="text" class="form-control" id="last_name" placeholder="Nom" required>
+                    <input type="text" class="form-control" id="last_name" placeholder="Nom" required autocomplete="family-name">
                 </div>
             </div>
-
-            <div>
+            <div class="mt-2">
                 <label class="form-label mb-1">Nom d'utilisateur</label>
-                <input type="text" class="form-control" id="username" placeholder="Nom d'utilisateur" required>
+                <input type="text" class="form-control" id="username" placeholder="ex: adama_admin" required autocomplete="username">
             </div>
-
-            <div>
+            <div class="mt-2">
                 <label class="form-label mb-1">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="Email" required>
+                <input type="email" class="form-control" id="email" placeholder="votre@email.com" required autocomplete="email">
             </div>
-
-            <div class="row g-2">
-                <div class="col-md-6">
+            <div class="row g-2 mt-0">
+                <div class="col-6">
                     <label class="form-label mb-1">Mot de passe</label>
-                    <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
+                    <div class="password-toggle">
+                        <input type="password" class="form-control" id="password" placeholder="Min. 6 caractères" required autocomplete="new-password">
+                        <i class="bi bi-eye toggle-eye" id="togglePwd"></i>
+                    </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-6">
                     <label class="form-label mb-1">Confirmer</label>
-                    <input type="password" class="form-control" id="password_confirm" placeholder="Confirmer" required>
+                    <div class="password-toggle">
+                        <input type="password" class="form-control" id="password_confirm" placeholder="Répéter" required autocomplete="new-password">
+                        <i class="bi bi-eye toggle-eye" id="togglePwdConfirm"></i>
+                    </div>
                 </div>
             </div>
-
-            <button type="button" class="btn btn-primary mt-2" id="nextBtn">Suivant</button>
+            <button type="button" class="btn btn-primary w-100 mt-3" id="nextBtn">
+                Suivant <i class="bi bi-arrow-right"></i>
+            </button>
         </div>
 
-        <!-- PARTIE 2 : Infos salon -->
+        <!-- ÉTAPE 2 : Infos salon -->
         <div id="salonInfoSection" style="display:none;">
-            <hr class="my-2">
             <div>
-                <label class="form-label mb-1">Nom du salon</label>
-                <input type="text" class="form-control" id="salon_nom" placeholder="Nom du salon" required>
+                <label class="form-label mb-1">Nom du salon <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="salon_nom" placeholder="Ex: Salon Adama" required>
             </div>
-
-            <div>
+            <div class="mt-2">
                 <label class="form-label mb-1">Adresse</label>
                 <input type="text" class="form-control" id="salon_adresse" placeholder="Adresse du salon">
             </div>
-
-            <div class="row g-2">
-                <div class="col-md-6">
+            <div class="row g-2 mt-0">
+                <div class="col-6">
                     <label class="form-label mb-1">Téléphone</label>
-                    <input type="text" class="form-control" id="salon_telephone" placeholder="Téléphone du salon">
+                    <input type="tel" class="form-control" id="salon_telephone" placeholder="+223 7X XXX XXX">
                 </div>
-                <div class="col-md-6">
+                <div class="col-6">
                     <label class="form-label mb-1">Email salon</label>
-                    <input type="email" class="form-control" id="salon_email" placeholder="Email du salon">
+                    <input type="email" class="form-control" id="salon_email" placeholder="salon@email.com">
                 </div>
             </div>
-
-            <div>
-                <label class="form-label mb-1">Lien localisation</label>
-                <input type="url" class="form-control" id="salon_localisation" placeholder="Lien Google Maps">
+            <div class="mt-2">
+                <label class="form-label mb-1">Lien Google Maps</label>
+                <input type="url" class="form-control" id="salon_localisation" placeholder="https://maps.google.com/...">
             </div>
-
-            <div>
+            <div class="mt-2">
                 <label class="form-label mb-1">Nombre de postes</label>
-                <input type="number" min="1" class="form-control" id="max_postes" value="1">
+                <input type="number" min="1" max="20" class="form-control" id="max_postes" value="1">
             </div>
-
-            <button type="submit" class="btn btn-primary mt-2">Créer mon salon</button>
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" class="btn btn-soft" id="backBtn">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </button>
+                <button type="submit" class="btn btn-primary flex-grow-1 btn-submit-loading" id="submitBtn">
+                    <span class="spinner border-0" style="display:inline-block;"></span>
+                    <span id="submitText">Créer mon salon</span>
+                </button>
+            </div>
         </div>
     </form>
 
@@ -88,17 +169,34 @@
         <a href="/accounts/login/" class="btn btn-soft w-100">J'ai déjà un compte</a>
         <a href="/" class="btn btn-soft w-100">Retour accueil</a>
     </div>
-
-    <p id="formError" class="text-danger mt-3 mb-0" style="display:none;"></p>
 </div>
 
 <script>
 const userInfoSection = document.getElementById("userInfoSection");
 const salonInfoSection = document.getElementById("salonInfoSection");
-const nextBtn = document.getElementById("nextBtn");
+const formAlert = document.getElementById("formAlert");
 
-nextBtn.addEventListener("click", () => {
-    // Tu peux ajouter ici une validation rapide avant de passer à la partie salon
+function showAlert(msg, type = "error") {
+    formAlert.className = `form-alert ${type}`;
+    formAlert.textContent = msg;
+    formAlert.style.display = "block";
+    formAlert.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function hideAlert() { formAlert.style.display = "none"; }
+
+// Toggle password visibility
+["togglePwd", "togglePwdConfirm"].forEach((id, i) => {
+    const btn = document.getElementById(id);
+    const input = document.getElementById(i === 0 ? "password" : "password_confirm");
+    btn.addEventListener("click", () => {
+        const isText = input.type === "text";
+        input.type = isText ? "password" : "text";
+        btn.className = `bi ${isText ? "bi-eye" : "bi-eye-slash"} toggle-eye`;
+    });
+});
+
+document.getElementById("nextBtn").addEventListener("click", () => {
+    hideAlert();
     const firstName = document.getElementById("first_name").value.trim();
     const lastName = document.getElementById("last_name").value.trim();
     const username = document.getElementById("username").value.trim();
@@ -107,21 +205,51 @@ nextBtn.addEventListener("click", () => {
     const passwordConfirm = document.getElementById("password_confirm").value;
 
     if (!firstName || !lastName || !username || !email || !password || !passwordConfirm) {
-        alert("Veuillez remplir tous les champs.");
+        showAlert("Veuillez remplir tous les champs obligatoires.");
+        return;
+    }
+    if (password.length < 6) {
+        showAlert("Le mot de passe doit contenir au moins 6 caractères.");
         return;
     }
     if (password !== passwordConfirm) {
-        alert("Les mots de passe ne correspondent pas.");
+        showAlert("Les mots de passe ne correspondent pas.");
         return;
     }
 
-    // Passer à la section salon
     userInfoSection.style.display = "none";
     salonInfoSection.style.display = "block";
+    document.getElementById("dot1").className = "step-dot done";
+    document.getElementById("dot1").innerHTML = '<i class="bi bi-check"></i>';
+    document.getElementById("line1").className = "step-line done";
+    document.getElementById("dot2").className = "step-dot active";
+});
+
+document.getElementById("backBtn").addEventListener("click", () => {
+    hideAlert();
+    salonInfoSection.style.display = "none";
+    userInfoSection.style.display = "block";
+    document.getElementById("dot1").className = "step-dot active";
+    document.getElementById("dot1").textContent = "1";
+    document.getElementById("line1").className = "step-line";
+    document.getElementById("dot2").className = "step-dot";
 });
 
 document.getElementById("registerSalonForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    hideAlert();
+
+    const salonNom = document.getElementById("salon_nom").value.trim();
+    if (!salonNom) {
+        showAlert("Le nom du salon est obligatoire.");
+        return;
+    }
+
+    const submitBtn = document.getElementById("submitBtn");
+    const submitText = document.getElementById("submitText");
+    submitBtn.disabled = true;
+    submitBtn.classList.add("loading");
+    submitText.textContent = "Création en cours...";
 
     const payload = {
         username: document.getElementById("username").value.trim(),
@@ -130,16 +258,13 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
         password_confirm: document.getElementById("password_confirm").value,
         first_name: document.getElementById("first_name").value.trim(),
         last_name: document.getElementById("last_name").value.trim(),
-        salon_nom: document.getElementById("salon_nom").value.trim(),
+        salon_nom: salonNom,
         salon_adresse: document.getElementById("salon_adresse").value.trim(),
         salon_telephone: document.getElementById("salon_telephone").value.trim(),
         salon_email: document.getElementById("salon_email").value.trim(),
         salon_localisation: document.getElementById("salon_localisation").value.trim(),
         max_postes: Number(document.getElementById("max_postes").value || 1)
     };
-
-    const formError = document.getElementById("formError");
-    formError.style.display = "none";
 
     try {
         const res = await fetch("{% url 'accounts:api:register_salon' %}", {
@@ -150,23 +275,35 @@ document.getElementById("registerSalonForm").addEventListener("submit", async (e
 
         const data = await res.json();
         if (!res.ok) {
-            const firstError = Object.values(data)[0];
-            const message = Array.isArray(firstError) ? firstError[0] : "Erreur lors de l'inscription.";
+            const errors = data.errors || data;
+            const firstKey = Object.keys(errors)[0];
+            const firstVal = errors[firstKey];
+            const message = Array.isArray(firstVal) ? firstVal[0] : (typeof firstVal === "string" ? firstVal : "Erreur lors de l'inscription.");
             throw new Error(message);
         }
 
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("username", data.user?.username || "");
+        localStorage.setItem("salon_nom", data.salon?.nom || "");
         const canUseApp = data?.salon?.status === "approved" && data?.salon?.paiement_effectue === true;
         localStorage.setItem("salon_can_use_app", canUseApp ? "true" : "false");
-        localStorage.setItem(
-            "salon_block_message",
-            "Votre salon n'est pas encore validé par les administrateurs. Merci de patienter ou d'appeler BarbrePro au +223 78746643."
-        );
-        window.location.href = "/dashboard/";
+        localStorage.setItem("salon_block_message",
+            "Votre salon n'est pas encore validé. Merci de patienter ou d'appeler BarberPro au +223 78746643.");
+
+        showAlert("Salon créé avec succès ! Redirection...", "success");
+        setTimeout(() => {
+            if (canUseApp) {
+                window.location.href = "/dashboard/";
+            } else {
+                window.location.href = "/en-attente/";
+            }
+        }, 1200);
     } catch (err) {
-        formError.textContent = err.message;
-        formError.style.display = "block";
+        showAlert(err.message);
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("loading");
+        submitText.textContent = "Créer mon salon";
     }
 });
 </script>

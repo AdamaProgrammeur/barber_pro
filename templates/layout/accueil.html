@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarberPro - Plateforme SaaS pour salons</title>
+    <title>BarberPro - Plateforme SaaS pour salons de coiffure</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -11,269 +11,403 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
-            --bg: #f5f8ff;
+            --primary: #0a4bc8;
+            --primary-dark: #083a98;
+            --accent: #0f766e;
             --ink: #0f172a;
             --muted: #475467;
             --line: #d3e2ff;
-            --primary: #0a4bc8;
-            --primary-strong: #093a98;
-            --accent: #0f766e;
-            --card: #ffffff;
+            --bg: #f5f8ff;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
             font-family: "Manrope", sans-serif;
             color: var(--ink);
-            background:
-                radial-gradient(700px 380px at -8% -10%, rgba(10, 75, 200, 0.17), transparent 60%),
-                radial-gradient(780px 420px at 110% 0%, rgba(15, 118, 110, 0.14), transparent 60%),
-                linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+            background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+            overflow-x: hidden;
         }
 
+        /* ===== NAVBAR ===== */
         .navbar-shell {
-            border-bottom: 1px solid rgba(211, 226, 255, 0.7);
-            backdrop-filter: blur(8px);
-            background: rgba(255, 255, 255, 0.75);
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 1px solid rgba(211,226,255,0.7);
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.82);
         }
 
         .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-family: "Sora", sans-serif;
-            font-weight: 700;
-            color: var(--ink);
-            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px;
+            font-family: "Sora", sans-serif; font-weight: 700;
+            color: var(--ink); text-decoration: none;
         }
 
         .brand-mark {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            width: 38px; height: 38px; border-radius: 10px;
             background: linear-gradient(145deg, #0a4bc8, #1e66dc);
-            color: #fff;
+            color: #fff; display: flex; align-items: center; justify-content: center;
         }
 
-        .hero {
-            padding: 88px 0 60px;
+        /* ===== HERO ===== */
+        .hero { padding: 90px 0 70px; }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #eef4ff; border: 1px solid #bfd4ff;
+            border-radius: 20px; padding: 5px 14px;
+            font-size: 0.78rem; font-weight: 700; color: var(--primary);
+            margin-bottom: 20px;
         }
 
         .hero-title {
             font-family: "Sora", sans-serif;
-            font-size: clamp(2rem, 4vw, 3.3rem);
-            line-height: 1.08;
-            margin-bottom: 14px;
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            line-height: 1.1; margin-bottom: 18px;
         }
 
+        .hero-title span { color: var(--primary); }
+
         .hero-lead {
-            color: var(--muted);
-            font-size: 1.05rem;
-            max-width: 640px;
-            margin-bottom: 28px;
+            color: var(--muted); font-size: 1.05rem;
+            max-width: 580px; margin-bottom: 32px; line-height: 1.7;
         }
 
         .btn-main {
-            border: none;
-            background: var(--primary);
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform .2s ease, background .2s ease;
+            background: var(--primary); color: #fff;
+            padding: 13px 22px; border-radius: 12px; font-weight: 700;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+            border: none; transition: all .2s;
         }
+        .btn-main:hover { background: var(--primary-dark); transform: translateY(-2px); color: #fff; }
 
-        .btn-main:hover {
-            background: var(--primary-strong);
-            transform: translateY(-2px);
-            color: #fff;
+        .btn-outline {
+            border: 1.5px solid #bfd4ff; background: #fff; color: var(--primary);
+            padding: 13px 22px; border-radius: 12px; font-weight: 700;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+            transition: all .2s;
         }
+        .btn-outline:hover { background: #eef4ff; border-color: #8eb2fb; color: var(--primary-dark); }
 
-        .btn-lightline {
-            border: 1px solid #bfd4ff;
-            background: #fff;
-            color: #0a4bc8;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all .2s ease;
-        }
-
-        .btn-lightline:hover {
-            border-color: #8eb2fb;
-            background: #eef4ff;
-            color: #093a98;
-        }
-
+        /* Hero panel */
         .hero-panel {
-            border: 1px solid var(--line);
-            background: var(--card);
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 20px 40px rgba(2, 18, 55, 0.1);
+            background: #fff; border: 1px solid var(--line);
+            border-radius: 20px; padding: 24px;
+            box-shadow: 0 24px 48px rgba(2,18,55,0.1);
         }
 
-        .kpi {
-            border: 1px solid #e3ecff;
-            border-radius: 12px;
-            padding: 14px;
-            background: #fbfdff;
+        .hero-panel-title {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; color: #94a3b8; margin-bottom: 16px;
         }
 
-        .kpi .value {
-            font-family: "Sora", sans-serif;
-            font-size: 1.4rem;
-            color: #0a4bc8;
-            margin-bottom: 2px;
+        .kpi-item {
+            background: #f8fbff; border: 1px solid #e3ecff;
+            border-radius: 12px; padding: 14px 16px;
+        }
+
+        .kpi-val {
+            font-family: "Sora", sans-serif; font-size: 1.5rem;
+            font-weight: 800; color: var(--primary); line-height: 1;
+        }
+
+        .kpi-lbl { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+        /* ===== FEATURES ===== */
+        .features-section { padding: 70px 0; }
+
+        .section-label {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--primary); margin-bottom: 10px;
         }
 
         .section-title {
             font-family: "Sora", sans-serif;
-            font-size: 1.8rem;
-            margin-bottom: 8px;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            margin-bottom: 10px; line-height: 1.2;
         }
 
-        .section-sub {
-            color: var(--muted);
-            margin-bottom: 18px;
+        .section-sub { color: var(--muted); margin-bottom: 40px; font-size: 1rem; }
+
+        .feature-card {
+            background: #fff; border: 1px solid #dce8ff;
+            border-radius: 18px; padding: 24px;
+            box-shadow: 0 8px 24px rgba(2,18,55,0.05);
+            height: 100%; transition: transform .2s, box-shadow .2s;
         }
 
-        .feature {
-            height: 100%;
-            border: 1px solid #dce8ff;
-            border-radius: 16px;
-            background: #fff;
-            padding: 18px;
-            box-shadow: 0 10px 22px rgba(2, 18, 55, 0.06);
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 36px rgba(2,18,55,0.1);
         }
 
-        .feature i {
-            font-size: 1.35rem;
-            color: #0a4bc8;
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: #eef4ff; display: flex; align-items: center;
+            justify-content: center; font-size: 1.3rem; color: var(--primary);
+            margin-bottom: 16px;
         }
 
-        .about-box {
+        .feature-card h5 { font-weight: 700; margin-bottom: 8px; font-size: 1rem; }
+        .feature-card p { color: var(--muted); font-size: 0.88rem; margin: 0; line-height: 1.6; }
+
+        /* ===== ABOUT SECTION ===== */
+        .about-section { padding: 70px 0; }
+
+        .about-wrapper {
+            background: linear-gradient(135deg, #0a1628 0%, #0f2044 50%, #0a3a8a 100%);
+            border-radius: 28px;
+            padding: 56px 48px;
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .about-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: rgba(59,130,246,0.12);
+            top: -150px; right: -100px;
+        }
+
+        .about-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(14,165,233,0.08);
+            bottom: -120px; left: -80px;
+        }
+
+        .about-content { position: relative; z-index: 1; }
+
+        .about-avatar {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.8rem; color: #fff;
+            border: 4px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .about-name {
+            font-family: "Sora", sans-serif;
+            font-size: 1.8rem; font-weight: 800;
+            color: #fff; margin-bottom: 6px;
+        }
+
+        .about-role {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 20px; padding: 5px 14px;
+            font-size: 0.8rem; font-weight: 600; color: #93c5fd;
+            margin-bottom: 20px;
+        }
+
+        .about-desc {
+            color: rgba(255,255,255,0.78);
+            font-size: 0.95rem; line-height: 1.75;
+            max-width: 520px; margin-bottom: 28px;
+        }
+
+        .about-contact {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px; padding: 12px 20px;
+            color: #fff; text-decoration: none;
+            font-weight: 700; font-size: 0.95rem;
+            transition: all .2s; margin-bottom: 28px;
+        }
+
+        .about-contact:hover {
+            background: rgba(255,255,255,0.18);
+            color: #fff; transform: translateY(-2px);
+        }
+
+        .about-contact i { font-size: 1.1rem; color: #60a5fa; }
+
+        /* Skills badges */
+        .skill-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+
+        .skill-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px; padding: 6px 12px;
+            font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.85);
+        }
+
+        .skill-badge i { color: #60a5fa; }
+
+        /* Social links */
+        .social-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+        .social-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 16px; border-radius: 10px;
+            font-size: 0.82rem; font-weight: 700;
+            text-decoration: none; transition: all .2s;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .social-btn:hover { transform: translateY(-2px); }
+
+        .social-btn.yt  { background: rgba(255,0,0,0.15);    color: #fca5a5; }
+        .social-btn.fb  { background: rgba(24,119,242,0.15);  color: #93c5fd; }
+        .social-btn.li  { background: rgba(10,102,194,0.15);  color: #7dd3fc; }
+        .social-btn.tt  { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+        .social-btn.ig  { background: rgba(225,48,108,0.15);  color: #fda4af; }
+
+        .social-btn.yt:hover  { background: rgba(255,0,0,0.25); }
+        .social-btn.fb:hover  { background: rgba(24,119,242,0.25); }
+        .social-btn.li:hover  { background: rgba(10,102,194,0.25); }
+        .social-btn.tt:hover  { background: rgba(255,255,255,0.15); }
+        .social-btn.ig:hover  { background: rgba(225,48,108,0.25); }
+
+        /* Right side stats */
+        .about-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+        }
+
+        .about-stat {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 20px;
+            text-align: center;
+        }
+
+        .about-stat-val {
+            font-family: "Sora", sans-serif;
+            font-size: 2rem; font-weight: 800; color: #fff;
+            line-height: 1;
+        }
+
+        .about-stat-lbl {
+            font-size: 0.75rem; color: rgba(255,255,255,0.55);
+            margin-top: 6px; line-height: 1.4;
+        }
+
+        .about-quote {
+            background: rgba(59,130,246,0.12);
+            border-left: 3px solid #3b82f6;
+            border-radius: 0 12px 12px 0;
+            padding: 16px 20px;
+            color: rgba(255,255,255,0.85);
+            font-style: italic;
+            font-size: 0.9rem;
+            line-height: 1.6;
             margin-top: 20px;
-            border: 1px solid #d5e3ff;
-            border-radius: 18px;
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-            padding: 24px;
         }
 
-        .social-links a {
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-right: 12px;
-            margin-bottom: 8px;
-            color: #0a4bc8;
-            font-weight: 700;
+        /* ===== FOOTER ===== */
+        footer {
+            border-top: 1px solid rgba(211,226,255,0.6);
+            padding: 24px 0; color: #667085; font-size: 0.88rem;
         }
 
+        /* ===== ANIMATIONS ===== */
         .reveal {
-            opacity: 0;
-            transform: translateY(16px);
+            opacity: 0; transform: translateY(20px);
             animation: reveal .7s ease forwards;
         }
+        .d1 { animation-delay: .1s; }
+        .d2 { animation-delay: .2s; }
+        .d3 { animation-delay: .3s; }
+        .d4 { animation-delay: .4s; }
+        .d5 { animation-delay: .5s; }
 
-        .delay-1 { animation-delay: .1s; }
-        .delay-2 { animation-delay: .2s; }
-        .delay-3 { animation-delay: .3s; }
-        .delay-4 { animation-delay: .4s; }
+        @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes reveal {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        footer {
-            border-top: 1px solid rgba(211, 226, 255, 0.8);
-            color: #667085;
-            font-size: .95rem;
-            margin-top: 54px;
-            padding: 20px 0 28px;
+        @media (max-width: 767px) {
+            .hero { padding: 60px 0 40px; }
+            .about-wrapper { padding: 36px 24px; }
+            .about-stats { grid-template-columns: 1fr 1fr; }
+            .about-name { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-<header class="navbar-shell sticky-top">
+
+<!-- NAVBAR -->
+<header class="navbar-shell">
     <div class="container py-2 d-flex align-items-center justify-content-between">
         <a href="/" class="brand">
             <span class="brand-mark"><i class="bi bi-scissors"></i></span>
             <span>BarberPro</span>
         </a>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             {% if demo_login_enabled %}
-            <a href="/accounts/login/?demo=1" class="btn btn-sm btn-warning">Tester la démo</a>
+            <a href="/accounts/login/?demo=1" class="btn btn-sm btn-warning fw-bold">
+                <i class="bi bi-play-circle me-1"></i>Démo
+            </a>
             {% endif %}
-            <a href="/accounts/login/" class="btn btn-sm btn-outline-primary">Connexion</a>
-            <a href="/accounts/register-salon/" class="btn btn-sm btn-primary">Créer votre salon</a>
+            <a href="/accounts/login/" class="btn btn-sm btn-outline-primary fw-bold">Connexion</a>
+            <a href="/accounts/register-salon/" class="btn btn-sm btn-primary fw-bold">Créer votre salon</a>
         </div>
     </div>
 </header>
 
 <main>
+
+    <!-- ===== HERO ===== -->
     <section class="hero">
         <div class="container">
-            <div class="row align-items-center g-4">
-                <div class="col-lg-7">
-                    <h1 class="hero-title reveal">Le SaaS pour gérer votre salon comme une entreprise moderne</h1>
-                    <p class="hero-lead reveal delay-1">
-                        BarberPro centralise vos clients, services, file d'attente, paiements et membres d'équipe.
-                        Moins de désordre, plus de performance, meilleure expérience client.
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <div class="hero-badge reveal"><i class="bi bi-stars"></i> Plateforme SaaS pour salons</div>
+                    <h1 class="hero-title reveal d1">
+                        Gérez votre salon<br>comme une <span>entreprise moderne</span>
+                    </h1>
+                    <p class="hero-lead reveal d2">
+                        BarberPro centralise vos clients, services, file d'attente, paiements et dépenses.
+                        Moins de désordre, plus de performance.
                     </p>
-                    <div class="d-flex flex-wrap gap-2 reveal delay-2">
-                        <a href="/accounts/register-salon/" class="btn-main"><i class="bi bi-rocket-takeoff"></i> Créer votre salon</a>
-                        <a href="/accounts/login/" class="btn-lightline"><i class="bi bi-box-arrow-in-right"></i> Se connecter</a>
+                    <div class="d-flex flex-wrap gap-2 reveal d3">
+                        <a href="/accounts/register-salon/" class="btn-main">
+                            <i class="bi bi-rocket-takeoff"></i> Créer votre salon
+                        </a>
+                        <a href="/accounts/login/" class="btn-outline">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </a>
                         {% if demo_login_enabled %}
-                        <a href="/accounts/login/?demo=1" class="btn-lightline"><i class="bi bi-play-circle"></i> Tester la démo</a>
+                        <a href="/accounts/login/?demo=1" class="btn-outline">
+                            <i class="bi bi-play-circle"></i> Tester la démo
+                        </a>
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-lg-5">
-                    <div class="hero-panel reveal delay-3">
-                        <h5 class="fw-bold mb-3">Vue produit</h5>
+                <div class="col-lg-6 reveal d4">
+                    <div class="hero-panel">
+                        <div class="hero-panel-title">Aperçu du tableau de bord</div>
                         <div class="row g-2">
                             <div class="col-6">
-                                <div class="kpi">
-                                    <div class="value">1</div>
-                                    <small class="text-muted">Compte propriétaire</small>
+                                <div class="kpi-item">
+                                    <div class="kpi-val">24/7</div>
+                                    <div class="kpi-lbl">Accès à votre espace</div>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="kpi">
-                                    <div class="value">100%</div>
-                                    <small class="text-muted">Workflow digitalisé</small>
+                                <div class="kpi-item">
+                                    <div class="kpi-val">100%</div>
+                                    <div class="kpi-lbl">Workflow digitalisé</div>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="kpi">
-                                    <div class="value">0</div>
-                                    <small class="text-muted">Dépendance admin Django</small>
+                                <div class="kpi-item">
+                                    <div class="kpi-val">0 FCFA</div>
+                                    <div class="kpi-lbl">Perte non tracée</div>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <div class="kpi">
-                                    <div class="value">24/7</div>
-                                    <small class="text-muted">Accès à votre espace</small>
+                                <div class="kpi-item">
+                                    <div class="kpi-val">∞</div>
+                                    <div class="kpi-lbl">Clients gérés</div>
                                 </div>
                             </div>
                         </div>
@@ -283,58 +417,168 @@
         </div>
     </section>
 
-    <section class="pb-3">
+    <!-- ===== FEATURES ===== -->
+    <section class="features-section">
         <div class="container">
-            <h2 class="section-title reveal">Fonctionnalités clés</h2>
-            <p class="section-sub reveal delay-1">Un socle SaaS complet pour un salon professionnel.</p>
-            <div class="row g-3">
-                <div class="col-md-4 reveal delay-1">
-                    <article class="feature">
-                        <i class="bi bi-people"></i>
-                        <h5 class="mt-2">Gestion des clients</h5>
-                        <p class="text-muted mb-0">Fiches clients, historique et traitement rapide à l'accueil.</p>
-                    </article>
-                </div>
-                <div class="col-md-4 reveal delay-2">
-                    <article class="feature">
-                        <i class="bi bi-list-task"></i>
-                        <h5 class="mt-2">File d'attente intelligente</h5>
-                        <p class="text-muted mb-0">Ordre de passage clair, suivi des statuts en temps réel.</p>
-                    </article>
-                </div>
-                <div class="col-md-4 reveal delay-3">
-                    <article class="feature">
-                        <i class="bi bi-cash-coin"></i>
-                        <h5 class="mt-2">Services et paiements</h5>
-                        <p class="text-muted mb-0">Catalogue de services, montants cohérents, encaissement simplifié.</p>
-                    </article>
-                </div>
+            <div class="text-center mb-5 reveal">
+                <div class="section-label">Fonctionnalités</div>
+                <h2 class="section-title">Tout ce dont votre salon a besoin</h2>
+                <p class="section-sub">Un socle complet pour piloter votre activité au quotidien.</p>
             </div>
-
-            <div class="about-box reveal delay-4">
-                <h3 class="section-title" style="font-size:1.45rem;">À propos de nous</h3>
-                <p class="mb-2">
-                    Nous sommes <strong>Adama Programmeur</strong>, développeur informatique, formateur web et anglais.
-                    Nous accompagnons les entreprises et professionnels dans leur digitalisation.
-                </p>
-                <p class="mb-2">Contact direct: <a href="tel:+22378746643">+223 78 74 66 43</a></p>
-                <div class="social-links">
-                    <a href="https://www.youtube.com" target="_blank" rel="noopener"><i class="bi bi-youtube"></i> YouTube</a>
-                    <a href="https://www.facebook.com" target="_blank" rel="noopener"><i class="bi bi-facebook"></i> Facebook</a>
-                    <a href="https://www.linkedin.com" target="_blank" rel="noopener"><i class="bi bi-linkedin"></i> LinkedIn</a>
-                      <a href="https://www.tiktok.com" target="_blank" rel="noopener"><i class="bi bi-tiktok"></i> TikTok</a>
-                    <a href="https://www.instagram.com" target="_blank" rel="noopener"><i class="bi bi-instagram"></i> Instagram</a>
+            <div class="row g-3">
+                <div class="col-md-4 reveal d1">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-people-fill"></i></div>
+                        <h5>Gestion des clients</h5>
+                        <p>Fiches clients, historique et traitement rapide à l'accueil.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal d2">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-list-ol"></i></div>
+                        <h5>File d'attente intelligente</h5>
+                        <p>Ordre de passage clair, suivi des statuts en temps réel.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal d3">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-credit-card-fill"></i></div>
+                        <h5>Paiements centralisés</h5>
+                        <p>Espèces, Orange Money, Moov Africa — tout est enregistré.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal d1">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-wallet2"></i></div>
+                        <h5>Suivi des dépenses</h5>
+                        <p>Loyer, salaires, matériel — contrôlez vos charges facilement.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal d2">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-speedometer2"></i></div>
+                        <h5>Tableau de bord</h5>
+                        <p>Statistiques en temps réel : recettes, dépenses, bénéfice net.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 reveal d3">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="bi bi-person-gear"></i></div>
+                        <h5>Gestion de l'équipe</h5>
+                        <p>Rôles admin et réceptionniste, accès sécurisé par compte.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-wrapper reveal">
+                <div class="about-content">
+                    <div class="row g-5 align-items-center">
+
+                        <!-- Gauche : infos -->
+                        <div class="col-lg-7">
+                            <div class="about-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <h2 class="about-name">Adama Programmeur</h2>
+
+                            <div class="about-role">
+                                <i class="bi bi-patch-check-fill"></i>
+                                Développeur · Formateur Web & Anglais
+                            </div>
+
+                            <p class="about-desc">
+                                Je suis développeur informatique et formateur basé au Mali.
+                                J'accompagne les entreprises et professionnels dans leur transformation digitale —
+                                de la création d'applications sur mesure à la formation en développement web et en anglais.
+                            </p>
+
+                            <div class="skill-badges">
+                                <span class="skill-badge"><i class="bi bi-code-slash"></i> Python / Django</span>
+                                <span class="skill-badge"><i class="bi bi-phone"></i> Applications Web</span>
+                                <span class="skill-badge"><i class="bi bi-translate"></i> Formateur Anglais</span>
+                                <span class="skill-badge"><i class="bi bi-database"></i> PostgreSQL</span>
+                                <span class="skill-badge"><i class="bi bi-bootstrap"></i> Bootstrap</span>
+                            </div>
+
+                            <a href="tel:+22378746643" class="about-contact">
+                                <i class="bi bi-telephone-fill"></i>
+                                +223 78 74 66 43
+                            </a>
+
+                            <div class="social-grid">
+                                <a href="https://www.youtube.com" target="_blank" rel="noopener" class="social-btn yt">
+                                    <i class="bi bi-youtube"></i> YouTube
+                                </a>
+                                <a href="https://www.facebook.com" target="_blank" rel="noopener" class="social-btn fb">
+                                    <i class="bi bi-facebook"></i> Facebook
+                                </a>
+                                <a href="https://www.linkedin.com" target="_blank" rel="noopener" class="social-btn li">
+                                    <i class="bi bi-linkedin"></i> LinkedIn
+                                </a>
+                                <a href="https://www.tiktok.com" target="_blank" rel="noopener" class="social-btn tt">
+                                    <i class="bi bi-tiktok"></i> TikTok
+                                </a>
+                                <a href="https://www.instagram.com" target="_blank" rel="noopener" class="social-btn ig">
+                                    <i class="bi bi-instagram"></i> Instagram
+                                </a>
+                            </div>
+
+                            <div class="about-quote">
+                                "La technologie doit servir les gens, pas les compliquer.
+                                BarberPro est né de ce principe — simple, efficace, accessible."
+                            </div>
+                        </div>
+
+                        <!-- Droite : stats -->
+                        <div class="col-lg-5">
+                            <div class="about-stats">
+                                <div class="about-stat">
+                                    <div class="about-stat-val">5+</div>
+                                    <div class="about-stat-lbl">Années d'expérience</div>
+                                </div>
+                                <div class="about-stat">
+                                    <div class="about-stat-val">10+</div>
+                                    <div class="about-stat-lbl">Projets livrés</div>
+                                </div>
+                                <div class="about-stat">
+                                    <div class="about-stat-val">100%</div>
+                                    <div class="about-stat-lbl">Satisfaction client</div>
+                                </div>
+                                <div class="about-stat">
+                                    <div class="about-stat-val">🇲🇱</div>
+                                    <div class="about-stat-lbl">Basé au Mali</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </main>
 
+<!-- FOOTER -->
 <footer>
-    <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-1">
-        <span>BarberPro - Solution SaaS pour salons de coiffure</span>
-        <span>Conçu par Adama Programmeur</span>
+    <div class="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="brand-mark" style="width:28px;height:28px;border-radius:8px;font-size:.85rem;">
+                <i class="bi bi-scissors"></i>
+            </span>
+            <span class="fw-600">BarberPro</span>
+            <span class="text-muted">— Solution SaaS pour salons de coiffure</span>
+        </div>
+        <span class="text-muted">Conçu avec ❤️ par <strong>Adama Programmeur</strong> · Mali</span>
     </div>
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

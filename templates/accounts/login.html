@@ -51,9 +51,19 @@ async function updateSalonStatus(token) {
 }
 
 async function completeLogin(data) {
+    // Vider l'ancien localStorage avant de stocker les nouvelles valeurs
+    localStorage.removeItem("salon_can_use_app");
+    localStorage.removeItem("salon_block_message");
+    localStorage.removeItem("salon_nom");
+    localStorage.removeItem("username");
+
     localStorage.setItem("access_token", data.access);
     localStorage.setItem("refresh_token", data.refresh);
 
+    if (data.user?.username) localStorage.setItem("username", data.user.username);
+    if (data.salon?.nom) localStorage.setItem("salon_nom", data.salon.nom);
+
+    // Toujours vérifier le statut depuis l'API (source de vérité)
     await updateSalonStatus(data.access);
 
     const profileRes = await fetch("{% url 'accounts:api:profile' %}", {
@@ -67,6 +77,13 @@ async function completeLogin(data) {
 
     const profile = await profileRes.json();
     const role = (profile.role || "").toLowerCase();
+
+    // Lire salon_can_use_app APRES updateSalonStatus
+    const canUseApp = localStorage.getItem("salon_can_use_app");
+    if (canUseApp === "false") {
+        window.location.href = "/en-attente/";
+        return;
+    }
 
     if (role === "admin") {
         window.location.href = "/dashboard/";
