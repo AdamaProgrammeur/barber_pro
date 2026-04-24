@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-from dotenv import dotenv_values
 from decouple import Csv
 
 # =========================
@@ -8,39 +7,48 @@ from decouple import Csv
 # =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Read .env file directly, ignoring system environment variables
-_env = dotenv_values(BASE_DIR / ".env")
-
+# =========================
+# ENV CONFIG (PRODUCTION SAFE)
+# =========================
 def config(key, default=None, cast=None):
-    value = _env.get(key, default)
+    value = os.environ.get(key, default)
+
     if value is None:
         return default
+
     if cast is bool:
         return str(value).lower() in ("1", "true", "yes", "on")
+
     if cast is int:
         return int(value)
-    if cast is Csv():
+
+    if isinstance(cast, Csv):
         return [v.strip() for v in str(value).split(",") if v.strip()]
+
     if cast is not None:
         return cast(value)
+
     return value
+
 
 # =========================
 # Secrets & Debug
 # =========================
 SECRET_KEY = config("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise Exception("❌ SECRET_KEY manquant sur Render")
+
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 # =========================
 # Hosts & CSRF
 # =========================
-# ALLOWED_HOSTS (piloté par .env)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="barberpro-scwn.onrender.com",
     cast=Csv(),
 )
-
 
 # =========================
 # Installed apps
@@ -104,7 +112,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
 # =========================
-# Database
+# Database (Render PostgreSQL)
 # =========================
 DATABASES = {
     'default': {
@@ -118,7 +126,7 @@ DATABASES = {
 }
 
 # =========================
-# REST Framework
+# Django REST Framework
 # =========================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -134,6 +142,7 @@ REST_FRAMEWORK = {
 # =========================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
@@ -149,14 +158,20 @@ LOGOUT_REDIRECT_URL = 'login_page'
 # =========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MAX_POSTE = 3
+
 USE_TZ = False
 LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'Africa/Bamako'
 
 # =========================
-# Mode demo
+# Demo mode
 # =========================
-DEMO_LOGIN_ENABLED = config("DEMO_LOGIN_ENABLED", default=str(DEBUG)).lower() in ("1", "true", "yes", "on")
+DEMO_LOGIN_ENABLED = config(
+    "DEMO_LOGIN_ENABLED",
+    default=str(DEBUG),
+    cast=bool
+)
+
 DEMO_USERNAME = config("DEMO_USERNAME", default="demo_salon")
 DEMO_PASSWORD = config("DEMO_PASSWORD", default="demo123456")
 DEMO_EMAIL = config("DEMO_EMAIL", default="demo@salon.local")
