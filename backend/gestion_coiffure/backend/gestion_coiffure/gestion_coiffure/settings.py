@@ -29,14 +29,14 @@ DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "o
 # ALLOWED_HOSTS (piloté par .env)
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost,barber-pro-upue.onrender.com",
+    default="127.0.0.1,localhost,https://barberpro-scwn.onrender.com",
     cast=Csv(),
 )
 
 # CSRF_TRUSTED_ORIGINS (piloté par .env)
 CSRF_TRUSTED_ORIGINS = config(
     "CSRF_TRUSTED_ORIGINS",
-    default="https://barber-pro-upue.onrender.com",
+    default="https://barberpro-scwn.onrender.com",
     cast=Csv(),
 )
 
