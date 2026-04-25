@@ -1,6 +1,6 @@
 import requests
 
-url = "https://barber-pro-upue.onrender.com/accounts/api/register-salon/"
+url = "https://barberpro-scwn.onrender.com/accounts/api/register-salon/"
 
 payload = {
     "username": "client_test1",
