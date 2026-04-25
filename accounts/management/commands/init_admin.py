@@ -25,18 +25,18 @@ class Command(BaseCommand):
                     email=email,
                     defaults={
                         'username': email.split('@')[0],
-                        'is_staff': True,
-                        'is_active': True,
-                        'is_superuser': True, # Recommandé pour un compte admin initial
                     }
                 )
 
-                if not created:
-                    self.stdout.write(self.style.WARNING(f"L'utilisateur {email} existe déjà."))
-                else:
-                    user.set_password(password)
-                    user.save()
-                    self.stdout.write(self.style.SUCCESS(f"Utilisateur {email} créé avec le username: {user.username}"))
+                # On force les droits et le mot de passe même si l'utilisateur existe déjà
+                user.is_staff = True
+                user.is_superuser = True
+                user.is_active = True
+                user.set_password(password)
+                user.save()
+
+                status_msg = "créé" if created else "mis à jour"
+                self.stdout.write(self.style.SUCCESS(f"Utilisateur {email} {status_msg} avec le username: {user.username}"))
 
                 # 2. Création du salon
                 salon, s_created = Salon.objects.get_or_create(
