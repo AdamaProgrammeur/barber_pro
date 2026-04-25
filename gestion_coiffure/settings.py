@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from decouple import Csv
+import dj_database_url
 
 # =========================
 # Paths
@@ -111,18 +112,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
-# =========================
-# Database (Render PostgreSQL)
-# =========================
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
-    }
+    'default': dj_database_url.config(
+        default=config("DATABASE_URL")
+    )
 }
 
 # =========================
