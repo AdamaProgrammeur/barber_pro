@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 else:
                     user.set_password(password)
                     user.save()
-                    self.stdout.write(self.style.SUCCESS(f"Utilisateur {email} créé."))
+                    self.stdout.write(self.style.SUCCESS(f"Utilisateur {email} créé avec le username: {user.username}"))
 
                 # 2. Création du salon
                 salon, s_created = Salon.objects.get_or_create(
