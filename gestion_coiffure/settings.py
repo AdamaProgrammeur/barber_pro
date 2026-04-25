@@ -35,12 +35,15 @@ def config(key, default=None, cast=None):
 # =========================
 # Secrets & Debug
 # =========================
-SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=True, cast=bool)
 
-if not SECRET_KEY:
+SECRET_KEY = config("SECRET_KEY", default="")
+
+if not SECRET_KEY and not DEBUG:
     raise Exception("❌ SECRET_KEY manquant sur Render")
-
-DEBUG = config("DEBUG", default=False, cast=bool)
+elif not SECRET_KEY:
+    # Clé de secours pour le développement local uniquement
+    SECRET_KEY = "django-insecure-dev-key-change-me-in-production"
 
 # =========================
 # Hosts & CSRF
@@ -114,7 +117,9 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config("DATABASE_URL")
+        default=config("DATABASE_URL", default=f"sqlite:///{BASE_DIR}/db.sqlite3"),
+        conn_max_age=600,
+        ssl_require=not DEBUG
     )
 }
 
