@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 import os
 
 class Command(BaseCommand):
-    help = "Crée un superutilisateur à partir des variables d'environnement"
+    help = "Cree un superutilisateur via variables d'environnement pour Render"
 
     def handle(self, *args, **kwargs):
         User = get_user_model()
