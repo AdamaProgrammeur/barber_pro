@@ -79,7 +79,6 @@ class SalonSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'nom',
-            'logo',
             'adresse',
             'telephone',
             'email',
