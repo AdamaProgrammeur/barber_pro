@@ -50,7 +50,8 @@ elif not SECRET_KEY:
 # =========================
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="barberpro-scwn.onrender.com",
+    default="127.0.0.1",
+    
     cast=Csv(),
 )
 
