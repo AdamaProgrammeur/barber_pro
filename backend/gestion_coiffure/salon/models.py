@@ -39,4 +39,6 @@ class UserSalon(models.Model):
         unique_together = ("user", "salon")
 
     def __str__(self):
-        return f"{self.user.username} - {self.salon.nom} ({self.role})"
+        user = self.user.username if self.user else "Utilisateur inconnu"
+        salon = self.salon.nom if self.salon else "Salon inconnu"
+        return f"{user} - {salon} ({self.role})"
