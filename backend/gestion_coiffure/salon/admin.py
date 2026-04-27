@@ -1,20 +1,37 @@
-# admin.py
 from django.contrib import admin
 from .models import Salon, UserSalon
 
-# Inline pour afficher les utilisateurs liés à un salon
+
+# INLINE SAFE (version production)
 class UserSalonInline(admin.TabularInline):
     model = UserSalon
-    extra = 1  # nombre de lignes vides pour ajouter de nouveaux utilisateurs
-    autocomplete_fields = ["user"]  # pratique si tu as beaucoup d'utilisateurs
+    extra = 1
 
-# Admin du salon
+    # ❌ ON SUPPRIME autocomplete_fields pour éviter crash Render
+    # autocomplete_fields = ["user"]
+
+
 @admin.register(Salon)
 class SalonAdmin(admin.ModelAdmin):
-    list_display = ["nom", "telephone", "email", "max_postes", "status", "paiement_effectue"]
+    list_display = [
+        "nom",
+        "telephone",
+        "email",
+        "max_postes",
+        "status",
+        "paiement_effectue",
+    ]
+
     list_filter = ["status", "paiement_effectue"]
-    actions = ["approve_salons", "reject_salons", "mark_paid", "mark_unpaid"]
-    inlines = [UserSalonInline]  # on ajoute l'inline pour gérer les utilisateurs
+
+    actions = [
+        "approve_salons",
+        "reject_salons",
+        "mark_paid",
+        "mark_unpaid",
+    ]
+
+    inlines = [UserSalonInline]
 
     @admin.action(description="Approuver les salons sélectionnés")
     def approve_salons(self, request, queryset):
