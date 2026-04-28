@@ -16,7 +16,7 @@ import dj_database_url
 from decouple import Csv, config
 from django.core.exceptions import ImproperlyConfigured
 from decouple import config
-
+import os
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
 
-# ALLOWED_HOSTS (piloté par .env)
+# ALLOWED_HOSTS (piloté p:15:37:17 +0000] "GET /static/admin/css/dashboard.css HTTP/1.1" 404 179 "https://barberpro-scwn.onrender.com/admin/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0"
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="barberpro-scwn.onrender.com",
@@ -204,6 +204,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = 'accounts:redirect_user'
 LOGOUT_REDIRECT_URL = 'login_page'
+
+
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+os.path.join(BASE_DIR, 'static')
+]
 
 # Mode demo (test application)
 DEMO_LOGIN_ENABLED = str(config('DEMO_LOGIN_ENABLED', default=str(DEBUG))).lower() in ('1', 'true', 'yes', 'on')
