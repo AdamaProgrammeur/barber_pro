@@ -6,8 +6,7 @@ from .models import Salon, UserSalon
 class UserSalonInline(admin.TabularInline):
     model = UserSalon
     extra = 1
-
-    # ❌ ON SUPPRIME autocomplete_fields pour éviter crash Render
+    # Désactivé pour éviter l'erreur 500 si UserAdmin n'a pas de search_fields
     # autocomplete_fields = ["user"]
 
 
