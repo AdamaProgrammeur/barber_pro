@@ -23,7 +23,7 @@ class Salon(models.Model):
     paiement_effectue = models.BooleanField(default=False)
 
     def __str__(self):
-         return self.nom or "Salon"
+        return str(self.nom) if self.nom else "Salon sans nom"
 
 
 class UserSalon(models.Model):
@@ -39,4 +39,4 @@ class UserSalon(models.Model):
         unique_together = ("user", "salon")
 
     def __str__(self):
-         return "UserSalon"
+        return f"{self.user} - {self.salon} ({self.role})"

@@ -6,7 +6,8 @@ from .models import Salon, UserSalon
 class UserSalonInline(admin.TabularInline):
     model = UserSalon
     extra = 1  # nombre de lignes vides pour ajouter de nouveaux utilisateurs
-    autocomplete_fields = ["user"]  # pratique si tu as beaucoup d'utilisateurs
+    # Désactive temporairement autocomplete_fields si le UserAdmin n'a pas de search_fields
+    # autocomplete_fields = ["user"] 
 
 # Admin du salon
 @admin.register(Salon)
