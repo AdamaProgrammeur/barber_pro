@@ -31,7 +31,7 @@ class SalonAdmin(admin.ModelAdmin):
         "mark_unpaid",
     ]
 
-    #inlines = [UserSalonInline]
+    inlines = [UserSalonInline]
 
     @admin.action(description="Approuver les salons sélectionnés")
     def approve_salons(self, request, queryset):
