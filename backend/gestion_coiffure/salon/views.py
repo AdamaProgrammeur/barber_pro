@@ -27,15 +27,11 @@ class UserSalonViewSet(viewsets.ModelViewSet):
         return UserSalon.objects.filter(salon=user_salon.salon)
 
     def perform_create(self, serializer):
-        """
-        Attribution automatique du salon lors de la création d'un utilisateur
-        """
         user_salon = UserSalon.objects.filter(user=self.request.user).first()
         if user_salon:
             serializer.save(salon=user_salon.salon)
         else:
             raise PermissionError("Impossible de créer un utilisateur sans salon")
-
 
 # =========================
 # Récupérer et mettre à jour le profil du salon
