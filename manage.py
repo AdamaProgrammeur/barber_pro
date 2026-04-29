@@ -6,6 +6,10 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    # Ajouter le chemin vers le dossier backend pour que Django trouve 'gestion_coiffure'
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.join(current_path, 'backend', 'gestion_coiffure'))
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gestion_coiffure.settings')
     try:
         from django.core.management import execute_from_command_line
