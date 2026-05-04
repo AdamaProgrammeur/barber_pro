@@ -15,11 +15,18 @@ class UserSalonViewSet(viewsets.ModelViewSet):
     serializer_class = UserSalonSerializer
     permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
+    def get_current_user_salon(self):
+        salon_id = self.request.query_params.get("salon_id")
+        queryset = UserSalon.objects.filter(user=self.request.user)
+        if salon_id:
+            queryset = queryset.filter(salon_id=salon_id)
+        return queryset.select_related("salon").first()
+
     def get_queryset(self):
         """
         Récupère uniquement les utilisateurs du salon du user connecté
         """
-        user_salon = UserSalon.objects.filter(user=self.request.user).first()
+        user_salon = self.get_current_user_salon()
         if not user_salon:
             return UserSalon.objects.none()
         return UserSalon.objects.filter(salon=user_salon.salon)
@@ -29,11 +36,31 @@ class UserSalonViewSet(viewsets.ModelViewSet):
         Attribution automatique du salon lors de la création d'un utilisateur.
         Lever PermissionDenied si aucun salon.
         """
-        user_salon = UserSalon.objects.filter(user=self.request.user).first()
+        user_salon = self.get_current_user_salon()
         if not user_salon:
             raise PermissionDenied("Impossible de créer un utilisateur sans salon")
 
         serializer.save(salon=user_salon.salon)
+
+
+class UserSalonsListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        usersalons = UserSalon.objects.select_related("salon").filter(user=request.user)
+        salons = []
+        for usersalon in usersalons:
+            salon = usersalon.salon
+            salons.append({
+                "salon_id": salon.id,
+                "nom": salon.nom,
+                "status": salon.status,
+                "paiement_effectue": salon.paiement_effectue,
+                "role": usersalon.role,
+                "can_use_app": is_salon_active(request.user, salon),
+            })
+        return Response({"salons": salons})
+
 
 # =========================
 # Récupérer et mettre à jour le profil du salon

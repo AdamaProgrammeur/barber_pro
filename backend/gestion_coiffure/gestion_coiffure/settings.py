@@ -21,10 +21,10 @@ import os
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-local-dev-key-12345')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str(config("DEBUG", default="False")).lower() in ("1", "true", "yes", "on")
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 # ALLOWED_HOSTS (piloté p:15:37:17 +0000] "GET /static/admin/css/dashboard.css HTTP/1.1" 404 179 "https://barberpro-scwn.onrender.com/admin/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0"
 ALLOWED_HOSTS = config(
@@ -49,14 +49,12 @@ INSTALLED_APPS = [
     'rest_framework',
     
 
-    'frontend',
     'accounts',
     'clients',
     'services',
     'paiements',
     'file_attente',
     'dashbord',
-    'salon',
 
 ]
 
@@ -115,36 +113,12 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASE_URL = config("DATABASE_URL", default="").strip()
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    _db_name = config("DB_NAME", default="").strip()
-    _db_user = config("DB_USER", default="").strip()
-    _db_password = config("DB_PASSWORD", default="").strip()
-    _db_host = config("DB_HOST", default="localhost").strip()
-    _db_port = config("DB_PORT", default="5432").strip()
-    if not _db_name or not _db_user or not _db_password:
-        raise ImproperlyConfigured(
-            "Database configuration missing. Set DATABASE_URL or DB_NAME/DB_USER/DB_PASSWORD."
-        )
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": _db_name,
-            "USER": _db_user,
-            "PASSWORD": _db_password,
-            "HOST": _db_host,
-            "PORT": _db_port,
-        }
-    }
-
+}
 
 # settings.py
 REST_FRAMEWORK = {

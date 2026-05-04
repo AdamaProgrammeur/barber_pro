@@ -25,6 +25,23 @@ logger = logging.getLogger(__name__)
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+
+def get_user_salons(user):
+    return UserSalon.objects.select_related("salon").filter(user=user)
+
+
+def serialize_user_salon(user_salon):
+    salon = user_salon.salon
+    return {
+        "salon_id": salon.id,
+        "nom": salon.nom,
+        "status": salon.status,
+        "paiement_effectue": salon.paiement_effectue,
+        "role": user_salon.role,
+        "can_use_app": is_salon_active(user_salon.user, salon),
+    }
+
+
 # Login
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -38,25 +55,16 @@ def login_view(request):
         serializer.is_valid(raise_exception=True)
         token_data = serializer.validated_data
 
-        # Récupérer le rôle
-        usersalon = UserSalon.objects.filter(user=user).first()
-        role = usersalon.role if usersalon else None
-
-        # Vérifier si le salon peut utiliser l'application
-        can_use_app = is_salon_active(user)
+        usersalons = list(get_user_salons(user))
+        salons = [serialize_user_salon(usersalon) for usersalon in usersalons]
+        selected_salon = salons[0] if salons else None
+        role = selected_salon["role"] if selected_salon else None
 
         token_data["user"]["role"] = role
-        if usersalon:
-            token_data["salon"] = {
-                "status": usersalon.salon.status,
-                "paiement_effectue": usersalon.salon.paiement_effectue,
-                "can_use_app": can_use_app,
-                "contact": "+223 78746643",
-                "message": (
-                    "Votre salon n'est pas encore validé par les administrateurs. "
-                    "Merci de patienter ou d'appeler BarberPro au +223 78746643."
-                ),
-            }
+        token_data["salons"] = salons
+        if selected_salon:
+            token_data["salon"] = selected_salon
+
         return Response(token_data)
 
     return Response({"error": "Invalid credentials"}, status=400)
@@ -72,16 +80,15 @@ class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            usersalon = UserSalon.objects.get(user=request.user)
-            role = usersalon.role
-        except UserSalon.DoesNotExist:
-            role = None
+        usersalons = list(get_user_salons(request.user))
+        salons = [serialize_user_salon(usersalon) for usersalon in usersalons]
+        role = salons[0]["role"] if salons else None
 
         return Response({
             "username": request.user.username,
             "email": request.user.email,
-            "role": role
+            "role": role,
+            "salons": salons,
         })
 
     def patch(self, request):
@@ -97,10 +104,13 @@ class ProfileAPIView(APIView):
             request.user.last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
 
         request.user.save()
+        usersalons = list(get_user_salons(request.user))
+        salons = [serialize_user_salon(usersalon) for usersalon in usersalons]
         return Response({
             "username": request.user.username,
             "email": request.user.email,
-            "role": UserSalon.objects.filter(user=request.user).first().role if UserSalon.objects.filter(user=request.user).exists() else None
+            "role": salons[0]["role"] if salons else None,
+            "salons": salons,
         })
 
 # UserViewSet

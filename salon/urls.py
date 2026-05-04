@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     UserSalonViewSet,
+    UserSalonsListView,
     SalonLogoView,
     SalonProfileView,
     SalonStatusView,
@@ -12,6 +13,7 @@ router.register(r'usersalon', UserSalonViewSet, basename='usersalon')
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('api/my-salons/', UserSalonsListView.as_view(), name='my-salons'),
 
     # Endpoints du salon
     path('api/settings/logo/', SalonLogoView.as_view(), name='salon-logo'),

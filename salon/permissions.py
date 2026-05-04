@@ -3,17 +3,18 @@ from rest_framework import permissions
 from .models import UserSalon, Salon
 
 
-def is_salon_active(user):
+def is_salon_active(user, salon=None):
     if not user or not user.is_authenticated:
         return False
     if getattr(user, "is_superuser", False):
         return True
 
-    user_salon = UserSalon.objects.select_related("salon").filter(user=user).first()
-    if not user_salon:
-        return False
+    if salon is None:
+        user_salon = UserSalon.objects.select_related("salon").filter(user=user).first()
+        if not user_salon:
+            return False
+        salon = user_salon.salon
 
-    salon = user_salon.salon
     if salon.status != Salon.STATUS_APPROVED:
         return False
     if not salon.paiement_effectue:

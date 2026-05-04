@@ -1,13 +1,12 @@
-<<<<<<< HEAD
 # BarberPro
 
-Application de gestion de salon de coiffure (back-office) construite avec Django + Django REST Framework.
-Elle permet de gérer les clients, services, file d'attente, paiements, utilisateurs du salon et tableau de bord.
+Application simple de gestion pour un salon de coiffure construite avec Django + Django REST Framework.
+Elle permet de gérer les clients, les services, la file d'attente, les paiements et le tableau de bord.
 
 ## Fonctionnalités
 
-- Authentification JWT (connexion, profil, rôles)
-- Création d'un salon et gestion des membres (`admin`, `receptionniste`)
+- Authentification simple (Admin / Staff)
+- Gestion des membres du personnel
 - Gestion des clients
 - Gestion des services
 - Gestion de la file d'attente
@@ -17,8 +16,8 @@ Elle permet de gérer les clients, services, file d'attente, paiements, utilisat
 
 ## Stack technique
 
-- Backend: Django 4.2, Django REST Framework
-- Base de données: PostgreSQL
+- Backend: Django 4.2+, Django REST Framework
+- Base de données: SQLite (par défaut)
 - Frontend: templates Django + assets statiques (et dossier frontend pour ressources UI)
 
 ## Arborescence utile
@@ -34,7 +33,6 @@ Elle permet de gérer les clients, services, file d'attente, paiements, utilisat
 │   ├── file_attente/
 │   ├── paiements/
 │   ├── dashbord/
-│   ├── salon/
 │   └── gestion_coiffure/settings.py
 ├── frontend/
 ├── requirements.txt
@@ -44,8 +42,7 @@ Elle permet de gérer les clients, services, file d'attente, paiements, utilisat
 ## Prérequis
 
 - Python 3.10+ (recommandé: 3.12)
-- PostgreSQL 13+
-- `pip` et environnement virtuel Python
+- `pip`
 
 ## Installation
 
