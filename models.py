@@ -39,7 +39,6 @@ class UserSalon(models.Model):
         unique_together = ("user", "salon")
 
     def __str__(self):
-        return f"{self.user} - {self.role}"
-        user_label = getattr(self.user, 'username', str(self.user)) if self.user else "Utilisateur inconnu"
-        salon_label = getattr(self.salon, 'nom', "Salon inconnu") if self.salon else "Salon inconnu"
+        user_label = getattr(self.user, 'username', str(self.user))
+        salon_label = self.salon.nom if self.salon else "Salon inconnu"
         return f"{user_label} - {salon_label} ({self.role})"
