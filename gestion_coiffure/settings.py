@@ -1,59 +1,45 @@
 from pathlib import Path
 import os
-from decouple import Csv
-import dj_database_url
+from dotenv import load_dotenv
 
 # =========================
 # Paths
 # =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# =========================
-# ENV CONFIG (PRODUCTION SAFE)
-# =========================
-def config(key, default=None, cast=None):
-    value = os.environ.get(key, default)
-
-    if value is None:
-        return default
-
-    if cast is bool:
-        return str(value).lower() in ("1", "true", "yes", "on")
-
-    if cast is int:
-        return int(value)
-
-    if isinstance(cast, Csv):
-        return [v.strip() for v in str(value).split(",") if v.strip()]
-
-    if cast is not None:
-        return cast(value)
-
-    return value
-
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 # =========================
 # Secrets & Debug
 # =========================
-DEBUG = config("DEBUG", default=True, cast=bool)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
 
-SECRET_KEY = config("SECRET_KEY", default="")
-
-if not SECRET_KEY and not DEBUG:
-    raise Exception("❌ SECRET_KEY manquant sur Render")
-elif not SECRET_KEY:
-    # Clé de secours pour le développement local uniquement
-    SECRET_KEY = "django-insecure-dev-key-change-me-in-production"
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # =========================
 # Hosts & CSRF
 # =========================
+<<<<<<< HEAD
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="127.0.0.1,localhost",
     
     cast=Csv(),
 )
+=======
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Ajout automatique de l'hôte Render en production
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Autoriser l'URL Render pour les vérifications CSRF (Indispensable pour l'admin)
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
+
+>>>>>>> 50b8510e97b46e86b781267964bc5a6d40588977
 
 # Ajout automatique de l'hôte Render en production
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -127,6 +113,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
+<<<<<<< HEAD
 db_url = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR}/db.sqlite3")
 
 DATABASES = {
@@ -136,6 +123,25 @@ DATABASES = {
         ssl_require=not DEBUG
     )
 }
+=======
+# =========================
+# Database
+# =========================
+import dj_database_url
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+>>>>>>> 50b8510e97b46e86b781267964bc5a6d40588977
 
 # =========================
 # Django REST Framework
@@ -176,17 +182,3 @@ MAX_POSTE = 3
 USE_TZ = False
 LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'Africa/Bamako'
-
-# =========================
-# Demo mode
-# =========================
-DEMO_LOGIN_ENABLED = config(
-    "DEMO_LOGIN_ENABLED",
-    default=str(DEBUG),
-    cast=bool
-)
-
-DEMO_USERNAME = config("DEMO_USERNAME", default="demo_salon")
-DEMO_PASSWORD = config("DEMO_PASSWORD", default="demo123456")
-DEMO_EMAIL = config("DEMO_EMAIL", default="demo@salon.local")
-DEMO_SALON_NAME = config("DEMO_SALON_NAME", default="Salon Demo")

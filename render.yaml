@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: barberpro
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py migrate && python manage.py create_superuser && gunicorn gestion_coiffure.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: barberpro.onrender.com
+      - key: DEMO_USERNAME
+        value: admin
+      - key: DEMO_EMAIL
+        value: admin@barberpro.app
+      - key: DEMO_PASSWORD
+        value: admin123456
+      - key: DEMO_SALON_NAME
+        value: Salon BarberPro
