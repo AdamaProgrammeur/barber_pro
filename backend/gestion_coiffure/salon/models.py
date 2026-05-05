@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-class Salon(models.Model):
+class  Salon(models.Model):
     STATUS_PENDING = "pending"
     STATUS_APPROVED = "approved"
     STATUS_REJECTED = "rejected"
@@ -15,16 +15,16 @@ class Salon(models.Model):
     logo = models.ImageField(upload_to="logos/", blank=True, null=True)
     adresse = models.TextField(blank=True)
     telephone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(blank=True, unique=True)
+    email = models.EmailField(blank=True)
     localisation = models.URLField(blank=True)
     max_postes = models.PositiveIntegerField(default=1)
     date_creation = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     paiement_effectue = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return str(self.nom) if self.nom else "Salon sans nom"
-
+ar
 
 class UserSalon(models.Model):
     ROLE_CHOICES = [
@@ -39,7 +39,6 @@ class UserSalon(models.Model):
         unique_together = ("user", "salon")
 
     def __str__(self):
-        return f"{self.user} - {self.role}"
         user_label = getattr(self.user, 'username', str(self.user)) if self.user else "Utilisateur inconnu"
         salon_label = getattr(self.salon, 'nom', "Salon inconnu") if self.salon else "Salon inconnu"
         return f"{user_label} - {salon_label} ({self.role})"
