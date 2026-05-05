@@ -19,7 +19,7 @@ class Salon(models.Model):
     localisation = models.URLField(blank=True)
     max_postes = models.PositiveIntegerField(default=1)
     date_creation = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_APPROVED)
     paiement_effectue = models.BooleanField(default=False)
     
     def __str__(self):
