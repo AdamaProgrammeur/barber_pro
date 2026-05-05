@@ -128,8 +128,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
 db_url = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR}/db.sqlite3")
+
 DATABASES = {
-    'default': dj_database_url.parse(db_url, conn_max_age=600, ssl_require=not DEBUG)
+    'default': dj_database_url.config(
+        default=db_url,
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
 }
 
 # =========================
@@ -150,7 +155,8 @@ REST_FRAMEWORK = {
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Utilisation d'un stockage plus tolérant pour éviter les erreurs 500 sur fichiers manquants
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
