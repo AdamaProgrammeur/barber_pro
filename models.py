@@ -40,4 +40,5 @@ class UserSalon(models.Model):
 
     def __str__(self):
         user_label = getattr(self.user, 'username', str(self.user))
-        salon_label = _label} - {salon_label} ({self.role})"
+        salon_label = getattr(self.salon, 'nom', "Salon inconnu")
+        return f"{user_label} - {salon_label} ({self.role})"

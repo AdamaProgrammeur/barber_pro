@@ -20,36 +20,16 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 # =========================
 # Hosts & CSRF
 # =========================
-<<<<<<< HEAD
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="127.0.0.1,localhost",
-    
-    cast=Csv(),
-)
-=======
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Ajout automatique de l'hôte Render en production
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# Autoriser l'URL Render pour les vérifications CSRF (Indispensable pour l'admin)
-if RENDER_EXTERNAL_HOSTNAME:
+    # Autoriser l'URL Render pour les vérifications CSRF (Indispensable pour l'admin)
     CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
-
->>>>>>> 50b8510e97b46e86b781267964bc5a6d40588977
-
-# Ajout automatique de l'hôte Render en production
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# Autoriser l'URL Render pour les vérifications CSRF (Indispensable pour l'admin)
-if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_EXTERNAL_HOSTNAME}"]
-
+else:
+    CSRF_TRUSTED_ORIGINS = []
 
 # =========================
 # Installed apps
@@ -113,35 +93,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 
-<<<<<<< HEAD
-db_url = config("DATABASE_URL", default=f"sqlite:///{BASE_DIR}/db.sqlite3")
-
-DATABASES = {
-    'default': dj_database_url.config(
-        default=db_url,
-        conn_max_age=600,
-        ssl_require=not DEBUG
-    )
-}
-=======
 # =========================
 # Database
 # =========================
 import dj_database_url
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR}/db.sqlite3")
+
 if DATABASE_URL:
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG
+        )
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
->>>>>>> 50b8510e97b46e86b781267964bc5a6d40588977
 
 # =========================
 # Django REST Framework
