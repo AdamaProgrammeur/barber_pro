@@ -4,7 +4,7 @@ import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gestion_coiffure.settings')
 django.setup()
- 
+
 from django.contrib.auth import get_user_model
 try:
     from salon.models import Salon, UserSalon
@@ -13,7 +13,6 @@ except ImportError:
 
 User = get_user_model()
 
-# On utilise les variables définies dans le fichier render.yaml
 username = os.environ.get("DEMO_USERNAME")
 email = os.environ.get("DEMO_EMAIL")
 password = os.environ.get("DEMO_PASSWORD")
@@ -23,14 +22,15 @@ if not username or not password:
     print("Superuser credentials not found in environment variables.")
     exit(0)
 
-if not User.objects.filter(username=username).exists():
-    user = User.objects.create_superuser(username=username, email=email, password=password)
-    print("Superuser created")
+user, created = User.objects.get_or_create(username=username, defaults={"email": email})
+user.set_password(password)
+user.is_staff = True
+user.is_superuser = True
+user.save()
+print("Superuser created" if created else "Superuser updated")
 
-    # Création du salon initial pour que l'app soit prête immédiatement
-    if Salon and UserSalon and not Salon.objects.exists():
-        salon = Salon.objects.create(nom=salon_name)
-        UserSalon.objects.create(user=user, salon=salon, role='admin')
-        print(f"Salon '{salon_name}' créé et lié à l'administrateur.")
-else:
-    print("Superuser already exists")
+if Salon and UserSalon and not Salon.objects.exists():
+    salon = Salon.objects.create(nom=salon_name)
+    UserSalon.objects.get_or_create(user=user, salon=salon, defaults={"role": "admin"})
+    print(f"Salon '{salon_name}' créé.")
+
