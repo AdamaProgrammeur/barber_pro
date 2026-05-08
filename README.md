@@ -63,13 +63,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Créer la base PostgreSQL (exemple):
-```sql
-CREATE DATABASE coiffure_db;
-CREATE USER postgres WITH PASSWORD 'postgres';
-GRANT ALL PRIVILEGES ON DATABASE coiffure_db TO postgres;
-```
-
 ## Configuration
 
 1. Copier le fichier d'exemple:

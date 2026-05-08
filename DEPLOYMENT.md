@@ -2,7 +2,7 @@
 
 ## Fichiers de déploiement créés
 
-✅ `render.yaml` - Configuration Render avec service web et base de données PostgreSQL
+✅ `render.yaml` - Configuration Render avec service web et SQLite
 ✅ `Procfile` - Commande de démarrage pour Gunicorn
 ✅ `runtime.txt` - Version Python 3.11.9
 ✅ `deploy.sh` - Script de vérification pré-déploiement
@@ -12,7 +12,6 @@
 - `SECRET_KEY` - Généré automatiquement par Render
 - `DEBUG=false` - Mode production
 - `ALLOWED_HOSTS` - Défini automatiquement par Render
-- `DATABASE_URL` - Fourni automatiquement par la base de données Render
 
 ## Étapes de déploiement
 
@@ -34,9 +33,8 @@
 - **Commande de build** : `pip install -r requirements.txt`
 - **Commande de démarrage** : `python manage.py migrate && gunicorn gestion_coiffure.wsgi:application --bind 0.0.0.0:$PORT`
 
-### 4. Base de données
-- PostgreSQL sera créée automatiquement
-- Les migrations s'exécuteront au premier démarrage
+### 4. Base de données (SQLite)
+- La base SQLite `db.sqlite3` sera initialisée au premier démarrage via les migrations.
 
 ### 5. Déploiement
 - Cliquez sur "Create Blueprint"

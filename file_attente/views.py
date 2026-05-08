@@ -177,7 +177,7 @@ class FileAttenteViewSet(viewsets.ModelViewSet):
 
         # --- Historique de la file (10 derniers clients) ---
         histo_file_qs = FileAttente.objects.filter(salon=salon).order_by('-id')[:10]
-        histo_file_data = FileAttenteSerializer(histo_file_qs, many=True).data
+        histo_file_data = FileAttenteSerializer(histo_file_qs, many=True, context={'request': request}).data
         historique_file = []
         for item in histo_file_data:
             historique_file.append({

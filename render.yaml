@@ -11,6 +11,8 @@ services:
         value: false
       - key: ALLOWED_HOSTS
         value: barberpro.onrender.com
+      - key: DATABASE_URL
+        value: sqlite:////opt/render/project/src/data/db.sqlite3
       - key: DEMO_USERNAME
         value: admin
       - key: DEMO_EMAIL
@@ -19,3 +21,7 @@ services:
         value: admin123456
       - key: DEMO_SALON_NAME
         value: Salon BarberPro
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
