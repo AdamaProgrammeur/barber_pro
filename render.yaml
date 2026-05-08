@@ -3,7 +3,7 @@ services:
     name: barberpro
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py migrate && python manage.py create_superuser && gunicorn gestion_coiffure.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: python manage.py migrate && python create_superuser.py && gunicorn gestion_coiffure.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: SECRET_KEY
         generateValue: true
