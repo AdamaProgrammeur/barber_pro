@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 
 # =========================
 # Paths
@@ -94,18 +95,12 @@ WSGI_APPLICATION = 'gestion_coiffure.wsgi.application'
 # =========================
 # Database
 # =========================
-# On lit DATABASE_URL pour Render (SQLite sur disque persistant)
-# sinon on utilise le chemin local par défaut.
-database_url = os.environ.get('DATABASE_URL')
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600
+    )
 }
-if database_url and database_url.startswith('sqlite:///'):
-    DATABASES['default']['NAME'] = database_url.replace('sqlite:///', '')
-else:
-    DATABASES['default']['NAME'] = BASE_DIR / 'db.sqlite3'
 
 # =========================
 # Django REST Framework
