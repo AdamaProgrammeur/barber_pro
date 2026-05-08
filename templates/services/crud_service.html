@@ -140,9 +140,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 🔹 Ajouter service
-    const addModal = new bootstrap.Modal(document.getElementById("addServiceModal"));
+    const addModalElement = document.getElementById("addServiceModal");
+    const addModal = bootstrap.Modal.getOrCreateInstance(addModalElement);
     document.getElementById("addServiceForm").addEventListener("submit", function(e) {
         e.preventDefault();
+        document.getElementById("addError").innerText = "";
         const nom = document.getElementById("addNom").value;
         const prix = document.getElementById("addPrix").value;
         const file = document.getElementById("addImage").files[0];
@@ -156,22 +158,36 @@ document.addEventListener("DOMContentLoaded", function () {
         if (file) formData.append("image", file);
 
         fetch("/api/services/", { method: "POST", headers: { "Authorization": "Bearer " + token }, body: formData })
-        .then(() => { loadServices(); this.reset(); addModal.hide(); });
+        .then(res => {
+            if (!res.ok) return res.json().then(data => Promise.reject(data));
+            return res.json();
+        })
+        .then(() => {
+            loadServices();
+            this.reset();
+            addModal.hide();
+        })
+        .catch(errData => {
+            document.getElementById("addError").innerText = errData.detail || JSON.stringify(errData);
+        });
     });
 
     // 🔹 Modifier service
+    const editModalElement = document.getElementById("editServiceModal");
+    const editModal = bootstrap.Modal.getOrCreateInstance(editModalElement);
     window.openEditModal = function(id) {
         const s = servicesList.find(s => s.id === id);
         if (!s) return;
         document.getElementById("editNom").value = s.nom;
         document.getElementById("editPrix").value = s.prix;
         document.getElementById("editServiceId").value = s.id;
-        new bootstrap.Modal(document.getElementById("editServiceModal")).show();
+        document.getElementById("editError").innerText = "";
+        editModal.show();
     }
 
-    const editModal = new bootstrap.Modal(document.getElementById("editServiceModal"));
     document.getElementById("editServiceForm").addEventListener("submit", function(e) {
         e.preventDefault();
+        document.getElementById("editError").innerText = "";
         const id = document.getElementById("editServiceId").value;
         const nom = document.getElementById("editNom").value;
         const prix = document.getElementById("editPrix").value;
@@ -186,7 +202,17 @@ document.addEventListener("DOMContentLoaded", function () {
         if (file) formData.append("image", file);
 
         fetch(`/api/services/${id}/`, { method: "PUT", headers: { "Authorization": "Bearer " + token }, body: formData })
-        .then(() => { loadServices(); editModal.hide(); });
+        .then(res => {
+            if (!res.ok) return res.json().then(data => Promise.reject(data));
+            return res.json();
+        })
+        .then(() => {
+            loadServices();
+            editModal.hide();
+        })
+        .catch(errData => {
+            document.getElementById("editError").innerText = errData.detail || JSON.stringify(errData);
+        });
     });
 
     // 🔹 Supprimer service

@@ -24,7 +24,6 @@ class  Salon(models.Model):
 
     def __str__(self):
         return str(self.nom) if self.nom else "Salon sans nom"
-ar
 
 class UserSalon(models.Model):
     ROLE_CHOICES = [

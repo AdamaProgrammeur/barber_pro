@@ -1,12 +1,15 @@
 # urls.py
 # file_attente/urls.py
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import FileAttenteViewSet
 
 router = DefaultRouter()
 router.register(r'file_attente', FileAttenteViewSet, basename='file_attente')
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('dashboard/', FileAttenteViewSet.as_view({'get': 'stats'}), name='dashboard-stats'),
+] + router.urls
 '''Avec cette configuration :
 
 Action	URL	Méthode

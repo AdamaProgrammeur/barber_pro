@@ -56,7 +56,9 @@
                         <div class="mb-3">
                             <label class="form-label">Mode de paiement</label>
                             <select id="mode" class="form-select" required>
-                                <option value="ESPECE">Espèce</option>
+                                <option value="CASH">Espèce</option>
+                                <option value="CARD">Carte</option>
+                                <option value="MOBILE">Mobile</option>
                                 <option value="ORANGE_MONEY">Orange Money</option>
                                 <option value="MOOV">Moov Africa</option>
                             </select>
@@ -102,22 +104,20 @@ document.addEventListener("DOMContentLoaded", function () {
     // ------------------ Charger les clients NON PAYÉS ------------------
     async function loadClients() {
         try {
-            const res = await fetch("/api/paiements/", {
+            const res = await fetch("/api/file_attente/", {
                 headers: { "Authorization": "Bearer " + token }
             });
             if (!res.ok) throw new Error("Impossible de charger les clients.");
 
             const data = await res.json();
-
-            // Filtrer uniquement les clients avec reste > 0
-            clientsData = data.filter(c => c.reste > 0);
+            clientsData = data.filter(c => c.paiement_info && parseFloat(c.paiement_info.reste) > 0);
 
             // Remplir le select
             clientSelect.innerHTML = '<option value="">-- Sélectionner un client --</option>';
             clientsData.forEach(c => {
                 const opt = document.createElement("option");
-                opt.value = c.file_attente; // id du file_attente
-                opt.textContent = `${c.client_nom} (${c.service_nom}) - Reste: ${c.reste} FCFA`;
+                opt.value = c.id;
+                opt.textContent = `${c.client_nom} (${c.service_nom}) - Reste: ${c.paiement_info.reste} FCFA`;
                 clientSelect.appendChild(opt);
             });
 
@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const id = this.value;
         if (!id) return resetClientInfo();
 
-        const client = clientsData.find(c => c.file_attente == id);
+        const client = clientsData.find(c => c.id == id);
         if (!client) {
             resetClientInfo();
             showAlert("Client introuvable !");
@@ -142,12 +142,12 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("client-nom").textContent = client.client_nom;
         document.getElementById("client-service").textContent = client.service_nom;
         document.getElementById("client-prix").textContent = client.prix_service;
-        document.getElementById("client-montant-paye").textContent = client.montant_paye;
-        document.getElementById("client-reste").textContent = client.reste;
-        document.getElementById("client-statut").textContent = client.statut;
-        document.getElementById("client-debut").textContent = client.date_debut;
+        document.getElementById("client-montant-paye").textContent = client.paiement_info.montant_paye || '0.00';
+        document.getElementById("client-reste").textContent = client.paiement_info.reste || '0.00';
+        document.getElementById("client-statut").textContent = client.paiement_info.statut || 'NON_PAYE';
+        document.getElementById("client-debut").textContent = client.date_debut ? new Date(client.date_debut).toLocaleString() : '—';
 
-        btnPaiement.disabled = (client.reste <= 0);
+        btnPaiement.disabled = parseFloat(client.paiement_info.reste) <= 0;
     });
 
     function resetClientInfo() {
@@ -194,24 +194,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             showAlert(
-                `Paiement enregistré. Montant payé : ${data.montant_paye}, reste : ${data.reste}`,
+                `Paiement enregistré. Montant payé : ${data.paiement_info.montant_paye}, reste : ${data.paiement_info.reste}`,
                 "success"
             );
 
             // Mettre à jour infos client
-            const client = clientsData.find(c => c.file_attente == clientId);
+            const client = clientsData.find(c => c.id == clientId);
             if (client) {
-                client.montant_paye = data.montant_paye;
-                client.reste = data.reste;
-                client.statut = data.statut;
+                client.paiement_info = client.paiement_info || {};
+                client.paiement_info.montant_paye = data.paiement_info.montant_paye;
+                client.paiement_info.reste = data.paiement_info.reste;
+                client.paiement_info.statut = data.paiement_info.statut;
             }
 
-            document.getElementById("client-montant-paye").textContent = data.montant_paye;
-            document.getElementById("client-reste").textContent = data.reste;
-            document.getElementById("client-statut").textContent = data.statut;
+            document.getElementById("client-montant-paye").textContent = data.paiement_info.montant_paye;
+            document.getElementById("client-reste").textContent = data.paiement_info.reste;
+            document.getElementById("client-statut").textContent = data.paiement_info.statut;
 
             // Désactiver si payé entièrement
-            if (data.reste <= 0) btnPaiement.disabled = true;
+            if (data.paiement_info.reste <= 0) btnPaiement.disabled = true;
 
             document.getElementById("paiement-form").reset();
             loadClients(); // rafraîchir la liste clients non payés

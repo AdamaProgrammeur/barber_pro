@@ -16,10 +16,15 @@ class UserSalonViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     def get_current_user_salon(self):
+        """
+        Récupère l'appartenance du user au salon spécifié ou au premier salon trouvé.
+        """
         salon_id = self.request.query_params.get("salon_id")
-        queryset = UserSalon.objects.filter(user=self.request.user)
-        if salon_id:
-            queryset = queryset.filter(salon_id=salon_id)
+        queryset = UserSalon.objects.filter(user=self.request.user).select_related("salon")
+        
+        if salon_id and salon_id.isdigit():
+            queryset = queryset.filter(salon_id=int(salon_id))
+            
         return queryset.select_related("salon").first()
 
     def get_queryset(self):
@@ -29,7 +34,10 @@ class UserSalonViewSet(viewsets.ModelViewSet):
         user_salon = self.get_current_user_salon()
         if not user_salon:
             return UserSalon.objects.none()
-        return UserSalon.objects.filter(salon=user_salon.salon)
+            
+        # On ajoute select_related('user') pour récupérer les infos de l'utilisateur (nom, email, etc.)
+        # et on filtre par le salon actif pour ne voir que le personnel de CE salon.
+        return UserSalon.objects.filter(salon=user_salon.salon).select_related('user', 'salon')
 
     def perform_create(self, serializer):
         """
@@ -70,7 +78,13 @@ class SalonProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, IsSalonActive]
 
     def get_object(self):
-        user_salon = UserSalon.objects.filter(user=self.request.user).first()
+        # On essaie de récupérer le salon via le paramètre salon_id si présent, sinon le premier.
+        salon_id = self.request.query_params.get("salon_id")
+        queryset = UserSalon.objects.filter(user=self.request.user)
+        if salon_id and salon_id.isdigit():
+            queryset = queryset.filter(salon_id=int(salon_id))
+        
+        user_salon = queryset.select_related("salon").first()
         if not user_salon: 
             raise Http404("Salon introuvable")
         return user_salon.salon

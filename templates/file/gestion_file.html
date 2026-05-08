@@ -3,6 +3,34 @@
 {% block content %}
 <h1 class="mb-4">Gestion des Files d'Attente</h1>
 
+<!-- Résumé Dashboard Dynamique -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow-sm">
+            <div class="card-body py-2">
+                <small>CA Aujourd'hui</small>
+                <h4 id="stat-ca-today" class="mb-0">0 FCFA</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white shadow-sm">
+            <div class="card-body py-2">
+                <small>Bénéfice Net Aujourd'hui</small>
+                <h4 id="stat-benefice-today" class="mb-0">0 FCFA</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark shadow-sm">
+            <div class="card-body py-2">
+                <small>Restes à Payer</small>
+                <h4 id="stat-reste-today" class="mb-0">0 FCFA</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="alert-container"></div>
 
 <!-- Bouton vers gestion paiements -->
@@ -47,7 +75,7 @@
           <div class="mb-3">
             <label class="form-label">Mode de paiement</label>
             <select class="form-select" id="modal-mode" required>
-              <option value="ESPECE">Espèce</option>
+              <option value="CASH">Espèce</option>
               <option value="ORANGE_MONEY">Orange Money</option>
               <option value="MOOV">Moov Africa</option>
             </select>
@@ -76,6 +104,18 @@ document.addEventListener("DOMContentLoaded", function () {
         else container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     }
 
+    // 🔹 Mettre à jour les stats en haut
+    function updateDashboardStats() {
+        fetch('/api/dashboard/', { headers: { "Authorization": "Bearer " + token } })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("stat-ca-today").innerText = `${Math.round(data.paiements.total_amount_today)} FCFA`;
+            document.getElementById("stat-reste-today").innerText = `${Math.round(data.paiements.reste_a_payer_today)} FCFA`;
+            document.getElementById("stat-benefice-today").innerText = `${Math.round(data.benefice_net_today)} FCFA`;
+        })
+        .catch(err => console.error("Erreur stats dashboard", err));
+    }
+
     // 🔹 Charger files
     function loadFile() {
         fetch('/api/file_attente/', { headers: { "Authorization": "Bearer " + token } })
@@ -83,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             fileList = data;
             renderFile();
+            updateDashboardStats();
         })
         .catch(err => showAlert("Erreur chargement file : " + JSON.stringify(err), "danger"));
     }
@@ -94,11 +135,15 @@ document.addEventListener("DOMContentLoaded", function () {
         .forEach(file => {
             const paiementInfo = file.paiement_info || null;
             const paid = !!paiementInfo && (paiementInfo.statut === "VALIDE" || Number(paiementInfo.reste) <= 0);
+            const reste = paiementInfo ? paiementInfo.reste : file.service_prix;
+            const montantPaye = paiementInfo ? paiementInfo.montant_paye : 0;
 
             const row = document.createElement("tr");
             row.dataset.id = file.id;
             row.dataset.paid = paid ? "true" : "false";
             row.dataset.servicePrice = file.service_prix;
+            row.dataset.reste = reste;
+            row.dataset.montantPaye = montantPaye;
 
             row.innerHTML = `
                 <td>${file.client_name} ${file.client_prenom}</td>
@@ -184,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("pay-now").onclick = () => openPaiementModal(row.querySelector(".pay-btn"));
 
             document.getElementById("pay-later").onclick = () => {
-                fetch("/api/paiements/non_payes/", {
+                fetch("/api/paiements/", {
                     method: "POST",
                     headers: { 
                         "Authorization": "Bearer " + token,
@@ -193,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     body: JSON.stringify({
                         file_attente: id,
                         montant: 0,
-                        mode_paiement: "ESPECE"
+                        mode_paiement: "CASH"
                     })
                 })
                 .then(res => {
@@ -227,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function openPaiementModal(btn) {
         const row = btn.closest("tr");
         document.getElementById("modal-client").value = row.children[0].innerText; 
-        document.getElementById("modal-montant").value = row.dataset.servicePrice || 0;
+        document.getElementById("modal-montant").value = row.dataset.reste || row.dataset.servicePrice || 0;
         document.getElementById("modal-file-id").value = row.dataset.id;
         paiementModal.show();
     }
@@ -253,14 +298,18 @@ document.addEventListener("DOMContentLoaded", function () {
             return res.json();
         })
         .then((data) => {
-            const isPaid = data.statut === "VALIDE" || Number(data.reste) <= 0;
+            showAlert(`Paiement enregistré. Montant payé : ${data.paiement_info.montant_paye}, reste : ${data.paiement_info.reste}`, "success");
+            // data est maintenant l'objet FileAttente mis à jour (grâce au changement dans views.py)
+            const pInfo = data.paiement_info || {};
+            const isPaid = pInfo.statut === "VALIDE" || Number(pInfo.reste) <= 0;
+            
             row.dataset.paid = isPaid ? "true" : "false";
-            if (isPaid) {
-                row.querySelector(".pay-btn").style.display = "none";
-                row.querySelector(".paid-badge").style.display = "inline-block";
-            }
-            updateRowStatus(row, row.querySelector(".statut span").innerText === "En attente" ? "EN_ATTENTE" : "EN_COURS");
+            row.dataset.reste = pInfo.reste || row.dataset.servicePrice;
+            row.dataset.montantPaye = pInfo.montant_paye || 0;
+
+            updateRowStatus(row, data.statut);
             paiementModal.hide();
+            updateDashboardStats(); // 🔄 Mise à jour immédiate du dashboard !
         })
         .catch(err => showAlert(err.message || "Erreur paiement", "danger"));
     });
