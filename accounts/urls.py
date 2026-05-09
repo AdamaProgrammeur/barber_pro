@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView
 from . import views
+from .views import create_superuser
 
 app_name = 'accounts'
 
@@ -16,4 +17,10 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('api/', include((api_urls, 'api'), namespace='api')),
+    path(
+    'create-superuser/<str:key>/',
+    create_superuser,
+    name='create_superuser'
+),
+
 ]

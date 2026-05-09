@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 from django.db import transaction
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
 import logging
 from rest_framework import status
 
@@ -248,3 +250,26 @@ def demo_login_view(request):
             "demo": True,
         }
     )
+
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+def create_superuser(request, key):
+
+    SECRET_KEY = "barberpro2026"
+
+    if key != SECRET_KEY:
+        return HttpResponse("Accès refusé ❌")
+
+    if User.objects.filter(is_superuser=True).exists():
+        return HttpResponse("Le super utilisateur existe déjà ✅")
+
+    User.objects.create_superuser(
+        username="admin",
+        email="admin@barberpro.com",
+        password="Admin123456"
+    )
+
+    return HttpResponse("Super utilisateur créé avec succès ✅")
